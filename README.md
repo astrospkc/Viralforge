@@ -1,73 +1,92 @@
-# React + TypeScript + Vite
+# 🎬 ViralForge
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **Create. Edit. Share. Discover.**
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🤔 What is ViralForge?
 
-## React Compiler
+**ViralForge** is a platform where you can upload your videos, chop them into short clips (like Reels or TikToks), and share them with the world — all in one place. Think of it as your personal video studio combined with a social sharing platform.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+But that's not all. ViralForge also brings something new to the table — a **food discovery feature** powered by video. Imagine scrolling through mouth-watering food videos, swiping right on a dish you love, and being taken straight to the restaurant where you can order it. It's like Tinder, but for food! 🍕
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 💡 The Idea — In Simple Words
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 📹 Part 1: Video Upload & Editing
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Ever recorded a long video and wished you could quickly cut out the best moments to share online? That's exactly what ViralForge helps you do:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1. **Upload your video** — Drag and drop any video file onto the platform.
+2. **Smart Transcoding** — We automatically convert your video into different quality formats (720p, 1080p, etc.) so it plays smoothly on any device, just like YouTube or Instagram does behind the scenes.
+3. **Edit into Shorts** — Use our built-in editor to trim, crop, and turn your long videos into bite-sized short clips — perfect for sharing on social media.
+4. **Share with the World** — Once you're happy with your edit, publish it directly from ViralForge. Your video goes live and anyone can watch, like, and interact with it.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+> **In short:** Upload → Edit → Share. It's that simple.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 🍔 Part 2: Food Discovery (Swipe & Order)
+
+Here's where things get really exciting. We're building a **food discovery experience** right inside ViralForge:
+
+- **Watch Food Videos** — Restaurants and food creators upload short, drool-worthy videos of their dishes.
+- **Swipe Right to Explore** — See something you like? Swipe right! You'll instantly see the restaurant's name, location, menu, and prices.
+- **Order the Food** — Found your next meal? Place an order directly through the app. It connects with food delivery services so the food comes straight to your doorstep.
+
+Think of it like this:
+
+> 🎥 *You're scrolling through videos…*
+> 🍜 *A steaming bowl of ramen catches your eye…*
+> 👉 *You swipe right…*
+> 📍 *You see it's from a restaurant 2 km away…*
+> 🛒 *You tap "Order Now"…*
+> 🚀 *30 minutes later, it's at your door!*
+
+It's the bridge between **"that looks delicious"** and **"I'm eating it right now."**
+
+---
+
+## 🎯 Why ViralForge?
+
+| Problem | ViralForge Solution |
+|---|---|
+| Editing videos is hard and needs expensive software | Simple, built-in editor — no downloads needed |
+| Sharing short clips requires multiple apps | Upload, edit, and share — all in one place |
+| You see food videos online but can't easily find or order the dish | Swipe on food videos and order directly |
+| Restaurants struggle to showcase their food in an engaging way | Video-first platform lets restaurants attract hungry customers |
+
+---
+
+## 🧩 Who is this for?
+
+- **Content Creators** — Upload videos, create shorts, and grow your audience.
+- **Casual Users** — Browse fun short videos and discover amazing food near you.
+- **Restaurants & Food Businesses** — Showcase your menu through engaging video content and get direct orders.
+- **Foodies** — Find your next meal by watching real food videos, not just photos.
+
+---
+
+## 🚀 The Vision
+
+ViralForge isn't just a video platform. It's a **content + commerce ecosystem** where:
+
+- **Creators** make and share awesome content.
+- **Viewers** discover videos and real-world products (starting with food).
+- **Businesses** connect with customers in a fun, visual, and engaging way.
+
+We're starting with food, but the swipe-to-buy concept can expand to fashion, travel, gadgets, and more. The goal is simple: **see it, love it, get it.**
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** React + TypeScript + Vite
+- **Styling:** Modern CSS with responsive design
+- **Video Processing:** Cloud-based video transcoding pipeline
+- **Deployment:** Optimized for fast, global delivery
+
+---
+
+*Built with ❤️ by the ViralForge Team*
