@@ -43,6 +43,12 @@ const Navbar = () => {
                         </Link>
                     ) : (
                         <div className="flex items-center gap-4">
+                            <Link to="/browse" className={`text-sm transition ${location.pathname === '/browse' ? 'text-white font-medium' : 'text-gray-400 hover:text-white'}`}>
+                                Browse
+                            </Link>
+                            <Link to="/transcode" className={`text-sm transition ${location.pathname === '/transcode' ? 'text-white font-medium' : 'text-gray-400 hover:text-white'}`}>
+                                Transcode
+                            </Link>
                             <span className="text-white text-sm">User</span>
                             <Link to="/" className="bg-[#E50914] text-white px-4 py-1.5 rounded-sm font-medium hover:bg-[#c11119] transition text-sm">
                                 Sign Out

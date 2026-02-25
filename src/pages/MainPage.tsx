@@ -3,8 +3,10 @@ import Navbar from '../components/Navbar';
 import VideoRow from '../components/VideoRow';
 import UploadModal from '../components/UploadModal';
 import { Play, Info, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const MainPage = () => {
+    const navigate = useNavigate()
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
     // Placeholder Data
@@ -28,6 +30,7 @@ const MainPage = () => {
 
                 <div className="absolute bottom-[20%] left-4 md:left-12 max-w-xl">
                     {/* Title Logo Placeholder or Text */}
+                    <button onClick={() => navigate('/transcode')} className="bg-[#E50914] hover:bg-[#c11119] text-white px-6 md:px-8 py-2 md:py-3 rounded flex items-center gap-2 transition font-bold text-lg cursor-pointer">Transcode</button>
                     <h1 className="text-5xl md:text-8xl font-black mb-4 drop-shadow-lg tracking-tighter text-[#E50914]">STRANGER <br /> THINGS</h1>
 
                     <div className="flex items-center gap-4 mb-4 text-white font-bold text-shadow">

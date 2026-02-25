@@ -1,13 +1,31 @@
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { useState } from 'react';
+import { AuthService } from '../services/auth_service';
+import { useAuthStore } from '../store/auth_store.ts';
 
 const SignUp = () => {
     const navigate = useNavigate();
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const { setToken, setIsAuthenticated } = useAuthStore();
 
-    const handleSignUp = (e: React.FormEvent) => {
+    const handleSignUp = async (e: React.FormEvent) => {
         e.preventDefault();
         // Registration logic here
-        navigate('/browse');
+        const data = {
+            name,
+            email,
+            password,
+        }
+        const response = await AuthService.SignUp(data);
+        console.log("register response :", response);
+        localStorage.setItem("token", response.token);
+        setToken(response.token);
+        setIsAuthenticated(true)
+
+        navigate("/browse");
     };
 
     return (
@@ -29,16 +47,28 @@ const SignUp = () => {
                     <p className="mb-6 md:text-gray-300">Just a few more steps and you're done! We hate paperwork, too.</p>
                     <form onSubmit={handleSignUp} className="flex flex-col gap-4">
                         <input
+                            type="text"
+                            placeholder="Name"
+                            className="p-4 border border-gray-400 rounded md:bg-[#333] placeholder-gray-500 md:placeholder-gray-400 text-black md:text-white focus:outline-none focus:ring-1 focus:ring-[#E50914]"
+                            required
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                        <input
                             type="email"
                             placeholder="Email address"
                             className="p-4 border border-gray-400 rounded md:bg-[#333] placeholder-gray-500 md:placeholder-gray-400 text-black md:text-white focus:outline-none focus:ring-1 focus:ring-[#E50914]"
                             required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
                         <input
                             type="password"
                             placeholder="Add a password"
                             className="p-4 border border-gray-400 rounded md:bg-[#333] placeholder-gray-500 md:placeholder-gray-400 text-black md:text-white focus:outline-none focus:ring-1 focus:ring-[#E50914]"
                             required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
                         <button type="submit" className="bg-[#E50914] text-white font-bold py-3 pt-3.5 rounded mt-4 hover:bg-[#c11119] transition">
                             Next

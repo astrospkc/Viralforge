@@ -3,6 +3,7 @@ import LandingPage from './pages/LandingPage';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import MainPage from './pages/MainPage';
+import TranscodingPage from './pages/TranscodingPage';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/browse" element={<MainPage />} />
+        <Route path="/transcode" element={<TranscodingPage />} />
       </Routes>
     </Router>
   );

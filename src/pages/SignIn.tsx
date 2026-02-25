@@ -1,13 +1,28 @@
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { useState } from 'react';
+import { AuthService } from '../services/auth_service';
+import { useAuthStore } from '../store/auth_store';
 
 const SignIn = () => {
     const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const { setToken, setIsAuthenticated } = useAuthStore();
 
-    const handleSignIn = (e: React.FormEvent) => {
+    const handleSignIn = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Validate logic here
-        navigate('/browse');
+        const data = {
+            email,
+            password,
+        }
+        const response = await AuthService.SignIn(data);
+        console.log("login response :", response);
+        localStorage.setItem("token", response.token);
+        setToken(response.token);
+        setIsAuthenticated(true)
+        navigate("/browse");
+
     };
 
     return (
@@ -30,12 +45,16 @@ const SignIn = () => {
                         <input
                             type="email"
                             placeholder="Email or mobile number"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             className="p-4 rounded bg-[#333] placeholder-gray-400 text-white focus:outline-none focus:bg-[#454545]"
                             required
                         />
                         <input
                             type="password"
                             placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             className="p-4 rounded bg-[#333] placeholder-gray-400 text-white focus:outline-none focus:bg-[#454545]"
                             required
                         />
@@ -53,7 +72,7 @@ const SignIn = () => {
                     </div>
 
                     <div className="mt-16 text-gray-400">
-                        New to Netflix? <Link to="/signup" className="text-white hover:underline">Sign up now</Link>.
+                        New to VIRAL_FORGE? <Link to="/signup" className="text-white hover:underline">Sign up now</Link>.
                     </div>
                     <div className="mt-4 text-xs text-gray-500">
                         This page is protected by Google reCAPTCHA to ensure you're not a bot.
