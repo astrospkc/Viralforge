@@ -19,7 +19,7 @@ const MainPage = () => {
             <Navbar />
 
             {/* Featured Video / Billboard */}
-            <div className="relative h-[60vh] md:h-[85vh] w-full">
+            <div className="relative h-[60vh] md:h-[100vh] w-full">
                 <img
                     src="https://occ-0-64-58.1.nflxso.net/dnm/api/v6/6AYY37jfdO6hpXcMjf9Yu5cnmO0/AAAABeJ7_yFj5z_p5Kx8q5r5q5z_p5Kx8q5r5.jpg?r=2c4" // Placeholder for hero
                     className="w-full h-full object-cover brightness-[0.7]"
@@ -28,10 +28,10 @@ const MainPage = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent"></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent"></div>
 
-                <div className="absolute bottom-[20%] left-4 md:left-12 max-w-xl">
+                <div className="absolute  top-[20%] bottom-[5%] left-4 md:left-12 max-w-xl ">
                     {/* Title Logo Placeholder or Text */}
                     <button onClick={() => navigate('/transcode')} className="bg-[#E50914] hover:bg-[#c11119] text-white px-6 md:px-8 py-2 md:py-3 rounded flex items-center gap-2 transition font-bold text-lg cursor-pointer">Transcode</button>
-                    <h1 className="text-5xl md:text-8xl font-black mb-4 drop-shadow-lg tracking-tighter text-[#E50914]">STRANGER <br /> THINGS</h1>
+                    <h1 className="text-5xl md:text-8xl font-black mb-4 drop-shadow-lg tracking-tighter text-[#E50914]">List of Collected Videos</h1>
 
                     <div className="flex items-center gap-4 mb-4 text-white font-bold text-shadow">
                         <span className="text-green-400">98% Match</span>
@@ -40,7 +40,7 @@ const MainPage = () => {
                         <span className="border border-white/40 px-1 text-xs">HD</span>
                     </div>
 
-                    <p className="text-lg md:text-xl text-shadow-md mb-6 line-clamp-3 font-medium">
+                    <p className="text-lg md:text-xl text-shadow-md mb-8 line-clamp-3 font-medium">
                         When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces and one strange little girl.
                     </p>
 
@@ -56,7 +56,7 @@ const MainPage = () => {
             </div>
 
             {/* Video Rows */}
-            <div className="pl-4 md:pl-12 -mt-24 relative z-10 space-y-2">
+            <div className="pl-4 md:pl-12 mt-30  relative z-10 space-y-2">
                 <VideoRow title="Trending Now" videos={videos1} />
                 <VideoRow title="New Releases" videos={videos2} />
                 <VideoRow title="Watch It Again" videos={videos3} />

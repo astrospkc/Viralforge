@@ -36,19 +36,21 @@ const TranscodingPage = () => {
 
     const clearFile = () => setSelectedFile(null);
     const handleUpload = async () => {
+        console.log("selectedFile :", selectedFile)
+        console.log(selectedFile instanceof File);
         if (!selectedFile) {
             return;
         }
-        const formData = new FormData();
-        formData.append('videoFileKey', selectedFile);
-        const response = await VideoService.GetPresignedUrl(formData, token);
-        if (response.status === 200) {
-            const presignedUrl = response.data;
+        const response = await VideoService.GetPresignedUrl({ filename: selectedFile.name, contentType: selectedFile.type }, token);
+        console.log("response for presigned url: ", response)
+        if (response.Code === 200) {
+            const presignedUrl = response.Url;
             const uploadResponse = await axios.put(presignedUrl, selectedFile, {
                 headers: {
-                    'Content-Type': 'video/mp4',
+                    'Content-Type': selectedFile.type,
                 },
             });
+            console.log("upload response: ", uploadResponse)
             if (uploadResponse.status === 200) {
                 console.log('File uploaded successfully');
             }
