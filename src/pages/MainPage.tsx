@@ -4,22 +4,18 @@ import VideoRow from '../components/VideoRow';
 import UploadModal from '../components/UploadModal';
 import { Play, Info, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/auth_store';
-import { AuthService } from '../services/auth_service';
+
 
 const MainPage = () => {
     const navigate = useNavigate()
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-    const { token } = useAuthStore()
+
 
     // Placeholder Data
     const videos1 = [1, 2, 3, 4, 5, 6, 7, 8];
     const videos2 = [9, 10, 11, 12, 13, 14, 15, 16];
     const videos3 = [17, 18, 19, 20, 21, 22, 23, 24];
-    const fetchUserData = async () => {
-        const response = await AuthService.GetUserData(token);
-        console.log("response: ", response)
-    }
+
     return (
         <div className="bg-[#141414] min-h-screen text-white pb-10">
             <Navbar />
@@ -36,7 +32,7 @@ const MainPage = () => {
 
                 <div className="absolute  top-[20%] bottom-[5%] left-4 md:left-12 max-w-xl ">
                     {/* Title Logo Placeholder or Text */}
-                    <button onClick={fetchUserData}>UserData</button>
+
                     <button onClick={() => navigate('/transcode')} className="bg-[#E50914] hover:bg-[#c11119] text-white px-6 md:px-8 py-2 md:py-3 rounded flex items-center gap-2 transition font-bold text-lg cursor-pointer">Transcode</button>
                     <h1 className="text-5xl md:text-8xl font-black mb-4 drop-shadow-lg tracking-tighter text-[#E50914]">List of Collected Videos</h1>
 

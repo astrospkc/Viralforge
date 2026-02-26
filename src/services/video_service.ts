@@ -1,6 +1,5 @@
 import axios from "axios";
 import baseUrl from "./api_service";
-import toast from "react-hot-toast";
 
 
 type GetPresignedUrlResponse = {
@@ -11,15 +10,15 @@ type GetPresignedUrlResponse = {
 export const VideoService = {
     async GetPresignedUrl(fileKey: { filename: string, contentType: string }, token: string): Promise<GetPresignedUrlResponse> {
         console.log("fileKey :", fileKey)
+
         try {
-            const response = await axios.post(
-                `${baseUrl}/video/v1/get_presigned_url`,
-                {
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                    },
-                    fileKey,
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${token}`
                 }
+            };
+            const response = await axios.post(
+                `${baseUrl}/video/v1/get_presigned_url`, fileKey, config
             );
             console.log("presigned url :", response.data)
             return {
