@@ -18,7 +18,8 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "types": [
-      "vite/client"
+      "vite/client",
+      "react"
     ],
     /* Linting */
     "strict": true,

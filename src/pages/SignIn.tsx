@@ -3,25 +3,38 @@ import Navbar from '../components/Navbar';
 import { useState } from 'react';
 import { AuthService } from '../services/auth_service';
 import { useAuthStore } from '../store/auth_store';
+import toast from 'react-hot-toast';
 
 const SignIn = () => {
     const navigate = useNavigate();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [formData, setFormData] = useState({ Email: "", Password: "" })
     const { setToken, setIsAuthenticated } = useAuthStore();
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target
+        setFormData(prev => ({ ...prev, [name]: value }))
+    }
     const handleSignIn = async (e: React.FormEvent) => {
         e.preventDefault();
-        const data = {
-            email,
-            password,
+        try {
+
+            const response = await AuthService.SignIn(formData);
+            console.log("login response :", response);
+            if (response?.Success) {
+                localStorage.setItem("token", response.Token);
+                setToken(response.Token);
+                setIsAuthenticated(true)
+                toast.success("Login successful");
+                navigate("/browse");
+            } else {
+                toast.error("failed to login")
+            }
+
+        } catch (error: unknown) {
+            console.error("failed to signin , internal error occurred", error)
+            throw new Error("internal error occurred while signing up");
         }
-        const response = await AuthService.SignIn(data);
-        console.log("login response :", response);
-        localStorage.setItem("token", response.token);
-        setToken(response.token);
-        setIsAuthenticated(true)
-        navigate("/browse");
+
 
     };
 
@@ -45,16 +58,18 @@ const SignIn = () => {
                         <input
                             type="email"
                             placeholder="Email or mobile number"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            value={formData.Email}
+                            name="Email"
+                            onChange={(e) => handleChange(e)}
                             className="p-4 rounded bg-[#333] placeholder-gray-400 text-white focus:outline-none focus:bg-[#454545]"
                             required
                         />
                         <input
                             type="password"
                             placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            value={formData.Password}
+                            name="Password"
+                            onChange={(e) => handleChange(e)}
                             className="p-4 rounded bg-[#333] placeholder-gray-400 text-white focus:outline-none focus:bg-[#454545]"
                             required
                         />

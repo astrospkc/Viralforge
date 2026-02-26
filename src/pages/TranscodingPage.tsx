@@ -3,7 +3,6 @@ import Navbar from '../components/Navbar';
 import { Upload, FileVideo, Scissors, Download, RefreshCw, X } from 'lucide-react';
 import { VideoService } from '../services/video_service';
 import { useAuthStore } from '../store/auth_store';
-import axios from 'axios';
 
 const TranscodingPage = () => {
     const { token } = useAuthStore()
@@ -45,14 +44,19 @@ const TranscodingPage = () => {
         console.log("response for presigned url: ", response)
         if (response.Code === 200) {
             const presignedUrl = response.Url;
-            const uploadResponse = await axios.put(presignedUrl, selectedFile, {
+            const uploadResponse = await fetch(presignedUrl, {
+                method: 'PUT',
+                body: selectedFile,
                 headers: {
                     'Content-Type': selectedFile.type,
                 },
             });
-            console.log("upload response: ", uploadResponse)
-            if (uploadResponse.status === 200) {
+            console.log("upload response status: ", uploadResponse.status)
+            if (uploadResponse.ok) {
                 console.log('File uploaded successfully');
+            } else {
+                const errText = await uploadResponse.text();
+                console.error('Upload failed:', uploadResponse.status, errText);
             }
         }
     }
@@ -112,7 +116,7 @@ const TranscodingPage = () => {
                                 <p className="mt-2 text-sm text-gray-500">Ready for processing</p>
                             </div>
                         )}
-                        <button disabled={!selectedFile} onClick={handleUpload} className="w-full py-4 rounded font-bold flex items-center justify-center gap-3 transition-all duration-300 bg-[#E50914] hover:bg-[#c11119] text-white shadow-lg">Upload Video</button>
+                        <button disabled={!selectedFile} onClick={handleUpload} className={`w-full py-4 rounded font-bold flex items-center justify-center gap-3 transition-all duration-300 bg-[#E50914] hover:bg-[#c11119] text-white shadow-lg ${!selectedFile ? 'opacity-50 cursor-not-allowed' : ''}`}>Upload Video</button>
                     </div>
 
                     {/* Controls Section */}

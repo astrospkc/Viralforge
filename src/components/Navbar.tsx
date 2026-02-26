@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuthStore } from '../store/auth_store';
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const location = useLocation();
     const isAuthPage = location.pathname === '/signin' || location.pathname === '/signup';
+    const { setToken } = useAuthStore()
 
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setToken('');
+        window.location.href = '/';
+    }
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 0) {
@@ -50,7 +58,7 @@ const Navbar = () => {
                                 Transcode
                             </Link>
                             <span className="text-white text-sm">User</span>
-                            <Link to="/" className="bg-[#E50914] text-white px-4 py-1.5 rounded-sm font-medium hover:bg-[#c11119] transition text-sm">
+                            <Link onClick={handleLogout} to="/" className="bg-[#E50914] text-white px-4 py-1.5 rounded-sm font-medium hover:bg-[#c11119] transition text-sm">
                                 Sign Out
                             </Link>
                         </div>

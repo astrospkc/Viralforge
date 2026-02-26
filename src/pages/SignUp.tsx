@@ -3,30 +3,39 @@ import Navbar from '../components/Navbar';
 import { useState } from 'react';
 import { AuthService } from '../services/auth_service';
 import { useAuthStore } from '../store/auth_store.ts';
+import toast from 'react-hot-toast';
 
 const SignUp = () => {
     const navigate = useNavigate();
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [formData, setFormData] = useState({ Name: "", Email: "", Password: "" })
     const { setToken, setIsAuthenticated } = useAuthStore();
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    }
     const handleSignUp = async (e: React.FormEvent) => {
-        e.preventDefault();
-        // Registration logic here
-        const data = {
-            name,
-            email,
-            password,
-        }
-        const response = await AuthService.SignUp(data);
-        console.log("register response :", response);
-        localStorage.setItem("token", response.token);
-        setToken(response.token);
-        setIsAuthenticated(true)
+        e.preventDefault()
+        try {
 
-        navigate("/browse");
+            const response = await AuthService.SignUp(formData);
+            console.log("register response :", response);
+            if (response?.Success) {
+                localStorage.setItem("token", response.Token);
+                setToken(response.Token);
+                setIsAuthenticated(true)
+                navigate("/browse");
+            } else {
+                toast.error("failed to signup, please try again with another email")
+            }
+
+        } catch (error) {
+            console.error("failed to sign up , internal error occurred", error)
+            throw new Error("internal error occurred while signing up");
+        }
     };
+
+
 
     return (
         <div className="relative min-h-screen w-full bg-white md:bg-transparent text-black md:text-white">
@@ -51,24 +60,27 @@ const SignUp = () => {
                             placeholder="Name"
                             className="p-4 border border-gray-400 rounded md:bg-[#333] placeholder-gray-500 md:placeholder-gray-400 text-black md:text-white focus:outline-none focus:ring-1 focus:ring-[#E50914]"
                             required
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            name='Name'
+                            value={formData.Name}
+                            onChange={(e) => handleChange(e)}
                         />
                         <input
                             type="email"
                             placeholder="Email address"
                             className="p-4 border border-gray-400 rounded md:bg-[#333] placeholder-gray-500 md:placeholder-gray-400 text-black md:text-white focus:outline-none focus:ring-1 focus:ring-[#E50914]"
                             required
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            name='Email'
+                            value={formData.Email}
+                            onChange={(e) => handleChange(e)}
                         />
                         <input
                             type="password"
                             placeholder="Add a password"
                             className="p-4 border border-gray-400 rounded md:bg-[#333] placeholder-gray-500 md:placeholder-gray-400 text-black md:text-white focus:outline-none focus:ring-1 focus:ring-[#E50914]"
                             required
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            name='Password'
+                            value={formData.Password}
+                            onChange={(e) => handleChange(e)}
                         />
                         <button type="submit" className="bg-[#E50914] text-white font-bold py-3 pt-3.5 rounded mt-4 hover:bg-[#c11119] transition">
                             Next
