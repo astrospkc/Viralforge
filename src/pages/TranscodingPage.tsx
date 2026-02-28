@@ -1,14 +1,26 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { Upload, FileVideo, Scissors, Download, RefreshCw, X } from 'lucide-react';
-import { VideoService } from '../services/video_service';
+import { VideoService, type VideoUpload } from '../services/video_service';
 import { useAuthStore } from '../store/auth_store';
+import toast from 'react-hot-toast';
 
 const TranscodingPage = () => {
     const { token } = useAuthStore()
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [pendindDbSave, setPendingDbSave] = useState<{ filename: string, contentType: string, objectKey: string } | null>(null)
+    const [allVideos, setAllVideos] = useState<VideoUpload[] | null>(null)
 
+    useEffect(() => {
+        const fetchVideos = async () => {
+            const response = await VideoService.GetAllVideos(token);
+            if (response?.Success) {
+                setAllVideos(response.VideoFiles);
+            }
+        };
+        fetchVideos();
+    }, [token]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -34,7 +46,10 @@ const TranscodingPage = () => {
         setIsDragging(false);
     }, []);
 
-    const clearFile = () => setSelectedFile(null);
+    const clearFile = () => {
+        setSelectedFile(null)
+        setPendingDbSave(null)
+    };
     const handleUpload = async () => {
         console.log("selectedFile :", selectedFile)
         console.log(selectedFile instanceof File);
@@ -54,11 +69,55 @@ const TranscodingPage = () => {
             });
             console.log("upload response status: ", uploadResponse.status)
             if (uploadResponse.ok) {
-                console.log('File uploaded successfully');
+                // if upload is ok but it failed to insert in db, then again send this request without uploading again to s3.
+                setPendingDbSave({ filename: selectedFile.name, contentType: selectedFile.type, objectKey: response.ObjectKey })
+
+                const createVideoResponse = await VideoService.CreateVideo(selectedFile.name, selectedFile.type, response.ObjectKey, token);
+                if (createVideoResponse?.Success) {
+                    console.log('File uploaded successfully');
+                    toast.success(createVideoResponse.Message);
+                    setPendingDbSave(null)
+
+                } else {
+                    toast.error("Failed to create video")
+                }
+
             } else {
                 const errText = await uploadResponse.text();
                 console.error('Upload failed:', uploadResponse.status, errText);
             }
+        }
+    }
+
+    const handleRetryUpload = async (filename: string, fileType: string, objectKey: string) => {
+        try {
+            const createVideoResponse = await VideoService.CreateVideo(filename, fileType, objectKey, token);
+            if (createVideoResponse?.Success) {
+                console.log('File uploaded successfully');
+                toast.success(createVideoResponse.Message);
+                setPendingDbSave(null)
+
+            } else {
+                toast.error("Failed to create video")
+            }
+        } catch (error) {
+            console.error("error in retrying upload: ", error)
+            toast.error("Failed to create video")
+        }
+    }
+
+    const handleDownloadVideo = async (fileUrl: string) => {
+        try {
+            const downloadVideoResponse = await VideoService.DownloadVideo(fileUrl, token);
+            if (downloadVideoResponse?.Success) {
+                console.log('Video downloaded successfully');
+                toast.success(downloadVideoResponse.Message);
+            } else {
+                toast.error("Failed to download video")
+            }
+        } catch (error) {
+            console.error("error in downloading video: ", error)
+            toast.error("Failed to download video")
         }
     }
 
@@ -117,8 +176,16 @@ const TranscodingPage = () => {
                                 <p className="mt-2 text-sm text-gray-500">Ready for processing</p>
                             </div>
                         )}
-                        <button disabled={!selectedFile} onClick={handleUpload} className={`w-full py-4 rounded font-bold flex items-center justify-center gap-3 transition-all duration-300 bg-[#E50914] hover:bg-[#c11119] text-white shadow-lg ${!selectedFile ? 'opacity-50 cursor-not-allowed' : ''}`}>Upload Video</button>
+                        {pendindDbSave ? (
+                            <>
+                                <button onClick={() => handleRetryUpload(pendindDbSave.filename, pendindDbSave.contentType, pendindDbSave.objectKey)} className={`w-1/2 py-4 my-2 rounded font-bold flex items-center justify-center gap-3 transition-all duration-300 bg-[#E50914] hover:bg-[#c11119] text-white shadow-lg ${!selectedFile ? 'opacity-50 cursor-not-allowed' : ''}`}>Retry Upload</button>
+                            </>
+                        ) :
+                            <button disabled={!selectedFile} onClick={handleUpload} className={`w-full py-4 rounded font-bold flex items-center justify-center gap-3 transition-all duration-300 bg-[#E50914] hover:bg-[#c11119] text-white shadow-lg ${!selectedFile ? 'opacity-50 cursor-not-allowed' : ''}`}>Upload Video</button>
+                        }
                     </div>
+
+
 
                     {/* Controls Section */}
                     <div className="space-y-6">
@@ -164,6 +231,30 @@ const TranscodingPage = () => {
                             </p>
                         </div>
                     </div>
+                    {
+                        allVideos?.map((video) => (
+                            <div key={video.id} className="bg-[#1f1f1f] rounded-lg p-6 border border-gray-800">
+                                <h1>Uploaded Videos</h1>
+                                <div className='p-4 bg-gray-800 rounded-lg'>
+                                    <p>{video.file_url}</p>
+                                    <p>{video.created_at}</p>
+                                    <p>{video.updated_at}</p>
+
+                                </div>
+
+                                <div className="space-y-4">
+                                    <button
+                                        onClick={() => handleDownloadVideo(video.file_url)}
+                                        disabled={!video.file_url}
+                                        className={`w-full py-4 rounded font-bold flex items-center justify-center gap-3 transition-all duration-300 ${video.file_url ? 'bg-gray-700 hover:bg-gray-600 text-white shadow-lg' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}
+                                    >
+                                        <Download size={20} />
+                                        Download Original
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    }
                 </div>
             </div>
         </div>
