@@ -130,6 +130,62 @@ export const VideoService = {
                 Message: "Failed to download video"
             }
         }
+    },
+
+    async TransocodeVideo(videoId: number, objectKey: string, token: string) {
+        try {
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            };
+            const response = await axios.post(
+                `${baseUrl}/video/v1/transcode_video`,
+                {
+                    ...config,
+                    params: { objectKey, videoId },
+                }
+            );
+            console.log("transcode video response :", response.data)
+            return response.data;
+        } catch (error) {
+            console.error("error in transcoding video: ", error)
+            return {
+                Data: null,
+                Code: 500,
+                Success: false,
+                Message: "Failed to transcode video"
+            }
+        }
+    },
+
+    async GetTranscodedVideo(token: string, videoId: number) {
+        try {
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            };
+            const response = await axios.get(
+                `${baseUrl}/video/v1/get_transcoded_videos`,
+                {
+                    ...config,
+                    params: { videoId },
+                }
+            );
+            console.log("get transcoded video response :", response.data)
+            return response.data;
+        } catch (error) {
+            console.error("error in getting transcoded video: ", error)
+            return {
+                Data: null,
+                Code: 500,
+                Success: false,
+                Message: "Failed to get transcoded video"
+            }
+        }
     }
+
+
 
 }
