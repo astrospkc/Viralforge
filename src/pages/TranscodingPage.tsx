@@ -20,7 +20,8 @@ type UploadPhase =
     | 'transcoding'     // Shorts: waiting for transcode to finish
     | 'metadata'        // Video: fill in metadata after upload
     | 'editing'         // Shorts: clip editor
-    | 'done';           // upload complete
+    | 'done'         // upload complete
+    | 'failed';
 
 // ── Component ──────────────────────────────────────────────────────────────────
 const TranscodingPage = () => {
@@ -28,6 +29,7 @@ const TranscodingPage = () => {
 
     // Tab / mode
     const [postType, setPostType] = useState<PostType>('video');
+
 
     // File selection
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -104,6 +106,24 @@ const TranscodingPage = () => {
     const onDragLeave = useCallback((e: React.DragEvent) => { e.preventDefault(); setIsDragging(false); }, []);
     const clearFile = () => { setSelectedFile(null); setUploadPhase('idle'); setPendingDbSave(null); };
 
+    // ------------polling for transcoding status ----------------------
+    useEffect(() => {
+        if (uploadPhase !== 'transcoding') return;
+        const interval = setInterval(async () => {
+            const res = await VideoService.GetTranscodeStatus(token, uploadedVideoId!);
+            if (res?.Success) {
+                if (res.Data?.transcode_status === 'completed') {
+                    toast.success('Transcoding completed');
+                    setUploadPhase('ready');
+                } else if (res.Data?.transcode_status === 'failed') {
+                    toast.error('Transcoding failed');
+                    setUploadPhase('failed');
+                }
+            }
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [uploadPhase, uploadedVideoId, token]);
+
     // ── Upload ─────────────────────────────────────────────────────────────────
     const handleUpload = async () => {
         if (!selectedFile) return;
@@ -122,6 +142,13 @@ const TranscodingPage = () => {
 
             setPendingDbSave({ filename: selectedFile.name, contentType: selectedFile.type, objectKey: presigned.ObjectKey });
 
+            // TODO: in createVideo() - add parameter:= title, description , tags, thumbnail
+            // one its done , transcode the video in the background process
+            // so basically click upload video :- createVideo and Transcode video runs
+            // transcoding result :- "processing", "completed" or "failed"
+            // processing - show processing modal
+            // completed - show completed modal
+            // failed - show failed modal - toast it
             const createRes = await VideoService.CreateVideo(
                 selectedFile.name, selectedFile.type, presigned.ObjectKey, token
             );
@@ -136,6 +163,9 @@ const TranscodingPage = () => {
 
                 if (postType === 'video') {
                     setUploadPhase('metadata');               // open inline metadata form
+                    // Here update the video details : parameters - title, description , tags, thumbnail
+                    const updateRes = await VideoService.UpdateVideo(videoId!, token, videoTitle, videoDescription, videoTags, selectedThumbnail, presigned.ObjectKey);
+                    console.log("updateRes :", updateRes)
                 } else {
                     setUploadPhase('transcoding');             // show "waiting" state
                 }
@@ -838,6 +868,16 @@ const TranscodingPage = () => {
                                         >
                                             <Download size={12} /> Download
                                         </button>
+                                        {
+                                            !video.transcode_status &&
+                                            <button
+                                                disabled={!video.file_url}
+                                                // onClick={() => handleTranscodeVideo(video.id, video.file_url)}
+                                                className="shrink-0 flex items-center gap-1.5 text-xs text-gray-400 hover:text-white border border-white/8 hover:border-white/20 px-3 py-1.5 rounded-lg transition-all"
+                                            >
+                                                Transcode
+                                            </button>
+                                        }
                                     </div>
 
                                     <div className="mt-3">

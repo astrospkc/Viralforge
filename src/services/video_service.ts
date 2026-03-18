@@ -17,6 +17,8 @@ export type VideoUpload = {
     file_type: string
     thumbnails: string[]
     selected_thumbnail: string
+    is_deleted: boolean
+    transcode_status: boolean
     created_at: string
     updated_at: string
 }
@@ -134,7 +136,7 @@ export const VideoService = {
         }
     },
 
-    async TranscodeVideo(videoId: number | null, objectKey: string, token: string) {
+    async TranscodeVideo(videoId: number, objectKey: string, token: string) {
         try {
             const config = {
                 headers: {
@@ -210,6 +212,41 @@ export const VideoService = {
                 Code: 500,
                 Success: false,
                 Message: "Failed to get transcode status"
+            }
+        }
+    },
+
+    async UpdateVideo(videoId: number, token: string, videoTitle: string, videoDescription: string, videoTags: string[], selectedThumbnail: File | string | null, objectKey: string) {
+        try {
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            };
+            const formData = new FormData();
+            formData.append('videoId', videoId.toString());
+            formData.append('videoTitle', videoTitle);
+            formData.append('videoDescription', videoDescription);
+            formData.append('videoTags', JSON.stringify(videoTags));
+            formData.append("objectKey", objectKey);
+            if (selectedThumbnail) {
+                formData.append('selectedThumbnail', selectedThumbnail);
+            }
+            const response = await axios.post(
+                `${baseUrl}/video/v1/update_video`,
+                formData,
+                config,
+
+            );
+            console.log("update video response :", response.data)
+            return response.data;
+        } catch (error) {
+            console.error("error in updating video: ", error)
+            return {
+                Data: null,
+                Code: 500,
+                Success: false,
+                Message: "Failed to update video"
             }
         }
     }
