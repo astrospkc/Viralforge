@@ -232,7 +232,7 @@ export const VideoService = {
             if (selectedThumbnail) {
                 formData.append('selectedThumbnail', selectedThumbnail);
             }
-            const response = await axios.post(
+            const response = await axios.put(
                 `${baseUrl}/video/v1/update_video`,
                 formData,
                 config,

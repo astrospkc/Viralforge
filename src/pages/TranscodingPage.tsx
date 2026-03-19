@@ -152,7 +152,7 @@ const TranscodingPage = () => {
             const createRes = await VideoService.CreateVideo(
                 selectedFile.name, selectedFile.type, presigned.ObjectKey, token
             );
-            console.log("createRes :", createRes)
+            console.log("create video response :", createRes)
             if (createRes?.Success) {
                 toast.success('Uploaded! ' + (postType === 'video' ? 'Fill in details below.' : 'Transcoding started…'));
                 setPendingDbSave(null);
@@ -165,7 +165,7 @@ const TranscodingPage = () => {
                     setUploadPhase('metadata');               // open inline metadata form
                     // Here update the video details : parameters - title, description , tags, thumbnail
                     const updateRes = await VideoService.UpdateVideo(videoId!, token, videoTitle, videoDescription, videoTags, selectedThumbnail, presigned.ObjectKey);
-                    console.log("updateRes :", updateRes)
+                    console.log("update video response :", updateRes)
                 } else {
                     setUploadPhase('transcoding');             // show "waiting" state
                 }

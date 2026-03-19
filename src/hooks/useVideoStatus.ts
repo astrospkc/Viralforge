@@ -39,7 +39,7 @@ export function useVideoStatus(videoId: number, token: string) {
     }
 
     useEffect(() => {
-        console.log("video id: ", videoId)
+        // console.log("video id: ", videoId)
         const poll = async () => {
             try {
                 const response = await VideoService.GetTranscodeStatus(token, videoId);
@@ -68,7 +68,7 @@ export function useVideoStatus(videoId: number, token: string) {
         return () => stopPolling();
     }, [videoId]);
 
-    console.log("video status at end: ", videoStatus)
+    // console.log("video status at end: ", videoStatus)
 
     return { videoStatus, stopPolling }
 }

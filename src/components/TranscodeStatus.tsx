@@ -12,7 +12,7 @@ type Props = {
 export default function TranscodeStatus(data: { v_id: number }) {
     const { token } = useAuthStore();
     const { videoStatus, stopPolling } = useVideoStatus(data.v_id, token);
-    console.log("video id , video status: ", data, videoStatus)
+    // console.log("video id , video status: ", data, videoStatus)
 
     // still waiting for worker to pick up
     if (videoStatus.status === "pending") {
