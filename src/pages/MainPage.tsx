@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import UploadModal from '../components/UploadModal';
 import { useAuthStore } from '../store/auth_store';
+import type { VideoPost, Review } from '../../types';
 import {
     Heart, MessageCircle, Share2, Star, Upload,
     ThumbsUp, MoreHorizontal, Play, Bookmark,
@@ -10,43 +11,10 @@ import {
     Paintbrush, Briefcase, Zap, CheckCircle,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { VideoService } from '../services/video_service';
+import { useInfiniteQuery } from '@tanstack/react-query';
 
-/* ─────────────────────────────────────────
-   TYPES
-───────────────────────────────────────── */
-type Review = {
-    id: number;
-    userId: number;
-    userName: string;
-    avatar: string;
-    rating: number;
-    comment: string;
-    helpful: number;
-    time: string;
-};
 
-type VideoPost = {
-    id: number;
-    userId: number;
-    userName: string;
-    userAvatar: string;
-    userVerified: boolean;
-    title: string;
-    description: string;
-    category: string;
-    thumbnail: string;
-    duration: string;
-    views: string;
-    likes: number;
-    quality: string;
-    tags: string[];
-    reviews: Review[];
-    time: string;
-};
-
-/* ─────────────────────────────────────
-   MOCK DATA   (replace with real API)
-───────────────────────────────────── */
 const CATEGORIES = [
     { id: 'all', label: 'All', icon: Layers },
     { id: 'trending', label: 'Trending', icon: Flame },
@@ -127,6 +95,9 @@ const POSTS: VideoPost[] = [
         duration: '11:17', views: '38K', likes: 1300, quality: 'HD', tags: ['Stripe', 'Node.js', 'Backend'], reviews: makeReviews(6), time: '2d ago',
     },
 ];
+
+
+
 
 /* ─────────────────────────────────────────
    Star Rating
@@ -410,7 +381,33 @@ const MainPage = () => {
 
     const [isUploadOpen, setIsUploadOpen] = useState(false);
     const [activeCategory, setActiveCategory] = useState<CategoryId>('all');
+    const [feeds, setFeeds] = useState<VideoPost[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const { token } = useAuthStore()
+
+
+    const fetchFeeds = async ({ pageParam = "" }) => {
+        try {
+            const response = await VideoService.GetAllFeeds(pageParam, 10, token);
+            if (response) {
+                setFeeds(response.VideoFiles);
+            }
+        } catch (error) {
+            console.error("error in getting all posts: ", error)
+        }
+    }
+
+
+
+    const { data: feedsData, fetchNextPage, hasNextPage } = useInfiniteQuery({
+        queryKey: ["feeds"],
+        queryFn: fetchFeeds,
+        getNextPageParam: (lastPage) => lastPage?.nextCursor,
+    })
+
+    console.log("feedsData: ", feedsData)
+
+
 
     /* Filter logic */
     const filtered = POSTS.filter(p => {

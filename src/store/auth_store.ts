@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 import { type AuthState, type User } from "../../types"
 
 export const useAuthStore = create<AuthState>()(
-    persist((set: (partial: Partial<AuthState>) => void) => ({
+    persist((set) => ({
         user: null,
         isAuthenticated: false,
         userLoading: false,
@@ -12,11 +12,10 @@ export const useAuthStore = create<AuthState>()(
         setUser: (user: User) => set({ user }),
         setIsAuthenticated: (value: boolean) => set({ isAuthenticated: value }),
         setUserLoading: (value: boolean) => set({ userLoading: value }),
-        logout: () => set({ user: null, isAuthenticated: false }),
+        logout: () => set({ user: null, isAuthenticated: false, token: "" }),
     }),
         {
             name: "auth-store",
         }
     )
-
 )

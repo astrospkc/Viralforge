@@ -46,7 +46,7 @@ export const VideoService = {
                 }
             };
             const response = await axios.post(
-                `${baseUrl}/video/v1/get_presigned_url`, fileKey, config
+                `${baseUrl}/v1/upload/initiate`, fileKey, config
             );
             console.log("presigned url :", response.data)
             return {
@@ -72,7 +72,7 @@ export const VideoService = {
                 }
             };
             const response = await axios.post(
-                `${baseUrl}/video/v1/create_video`, { filename, filetype, objectKey }, config
+                `${baseUrl}/v1/upload/commit`, { filename, filetype, objectKey }, config
             );
             console.log("create video response :", response.data)
             return response.data;
@@ -95,7 +95,7 @@ export const VideoService = {
                 }
             };
             const response = await axios.get(
-                `${baseUrl}/video/v1/get_all_videos`, config
+                `${baseUrl}/v1`, config
             );
             console.log("get all videos response :", response.data)
             return response.data;
@@ -117,7 +117,7 @@ export const VideoService = {
                 }
             };
             const response = await axios.get(
-                `${baseUrl}/video/v1/get_download_url`,
+                `${baseUrl}/v1/videos/download`,
                 {
                     ...config,
                     params: { objectKey },
@@ -224,7 +224,7 @@ export const VideoService = {
                 }
             };
             const formData = new FormData();
-            formData.append('videoId', videoId.toString());
+            // formData.append('videoId', videoId.toString());
             formData.append('videoTitle', videoTitle);
             formData.append('videoDescription', videoDescription);
             formData.append('videoTags', JSON.stringify(videoTags));
@@ -233,7 +233,7 @@ export const VideoService = {
                 formData.append('selectedThumbnail', selectedThumbnail);
             }
             const response = await axios.put(
-                `${baseUrl}/video/v1/update_video`,
+                `${baseUrl}/v1/videos/${videoId}`,
                 formData,
                 config,
 
@@ -249,7 +249,67 @@ export const VideoService = {
                 Message: "Failed to update video"
             }
         }
-    }
+    },
+
+    // get all feeds
+    // get your library 
+
+    async GetAllFeeds(cursor: string, limit: number, token: string) {
+        try {
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            };
+
+            const response = await axios.get(
+                `${baseUrl}/v1/feed?cursor=${cursor}&limit=${limit}`,
+                config,
+
+            );
+            console.log("get all feeds response :", response.data)
+            return response.data;
+        } catch (error) {
+            console.error("error in getting all feeds: ", error)
+            return {
+                Data: null,
+                Code: 500,
+                Success: false,
+                Message: "Failed to get all feeds"
+            }
+        }
+    },
+
+    async GetYourLibrary(cursor: string, limit: number, token: string) {
+        try {
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            };
+            const response = await axios.get(`${baseUrl}/v1/feed/mine`, {
+                params: {
+                    cursor: cursor || "",
+                    limit: limit || 10
+                },
+                ...config
+            })
+            console.log("get your library response :", response.data)
+            return response.data;
+        } catch (error) {
+            console.error("error in getting your library: ", error)
+            return {
+                Data: null,
+                Code: 500,
+                Success: false,
+                Message: "Failed to get your library"
+            }
+        }
+    },
+
+
+
+
 
 
 

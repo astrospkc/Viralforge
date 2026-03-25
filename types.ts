@@ -17,3 +17,33 @@ export type User = {
     createdAt: string;
     updatedAt: string;
 }
+
+export type Review = {
+    id: number;
+    userId: number;
+    userName: string;
+    avatar: string;
+    rating: number;
+    comment: string;
+    helpful: number;
+    time: string;
+};
+
+export type VideoPost = {
+    id: number;
+    userId: number;
+    userName: string;
+    userAvatar: string;
+    userVerified: boolean;
+    title: string;
+    description: string;
+    category: string;
+    thumbnail: string;
+    duration: string;
+    views: string;
+    likes: number;
+    quality: string;
+    tags: string[];
+    reviews: Review[];
+    time: string;
+};

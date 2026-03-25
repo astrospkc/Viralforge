@@ -41,6 +41,7 @@ const TranscodingPage = () => {
     const [uploadedVideoId, setUploadedVideoId] = useState<number | null>(null);
     const [uploadedFileUrl, setUploadedFileUrl] = useState<string>('');
     const [uploadedThumbnails, setUploadedThumbnails] = useState<string[]>([]);
+    const [presignedObjectKey, setPresignedObjectKey] = useState<string | null>(null);
 
     // Video publish modal state (inline dropdown style)
     const [videoTitle, setVideoTitle] = useState('');
@@ -88,6 +89,7 @@ const TranscodingPage = () => {
         setUploadedVideoId(null);
         setUploadedFileUrl('');
         setUploadedThumbnails([]);
+        setPresignedObjectKey(null);
         setVideoTitle(''); setVideoDescription(''); setVideoTags([]); setVideoTagInput('');
         setSelectedThumbnail(null); setCustomThumb(null); setCustomThumbPreview(null);
         setShortsTitle(''); setShortsDescription(''); setShortsTags([]); setShortsTagInput('');
@@ -149,6 +151,7 @@ const TranscodingPage = () => {
             // processing - show processing modal
             // completed - show completed modal
             // failed - show failed modal - toast it
+            setPresignedObjectKey(presigned.ObjectKey);
             const createRes = await VideoService.CreateVideo(
                 selectedFile.name, selectedFile.type, presigned.ObjectKey, token
             );
@@ -163,20 +166,18 @@ const TranscodingPage = () => {
 
                 if (postType === 'video') {
                     setUploadPhase('metadata');               // open inline metadata form
+                    console.log("videoId: ", videoId)
                     // Here update the video details : parameters - title, description , tags, thumbnail
-                    const updateRes = await VideoService.UpdateVideo(videoId!, token, videoTitle, videoDescription, videoTags, selectedThumbnail, presigned.ObjectKey);
-                    console.log("update video response :", updateRes)
+                    if (videoId != 0 && videoId != null) {
+                        const updateRes = await VideoService.UpdateVideo(videoId, token, videoTitle, videoDescription, videoTags, selectedThumbnail, presigned.ObjectKey);
+                        console.log("update video response :", updateRes)
+                    } else {
+                        toast("Video ID is null")
+                    }
                 } else {
                     setUploadPhase('transcoding');             // show "waiting" state
                 }
-                try {
-                    console.log("videoId :", videoId)
-                    const res = await VideoService.TranscodeVideo(videoId!, presigned.ObjectKey, token);
-                    console.log("transcode video response :", res)
-                    if (res?.Success) toast.success(res.Message);
 
-                    else toast.error('Failed to transcode video');
-                } catch { toast.error('Failed to transcode video'); }
                 // Refresh library
                 const libRes = await VideoService.GetAllVideos(token);
                 if (libRes?.Success) setAllVideos(libRes.VideoFiles);
@@ -188,6 +189,8 @@ const TranscodingPage = () => {
             toast.error('Upload failed');
             setUploadPhase('ready');
         }
+
+
     };
 
     const handleRetryDbSave = async () => {
@@ -227,11 +230,23 @@ const TranscodingPage = () => {
         if (!videoTitle.trim()) { toast.error('Title is required'); return; }
         // TODO: wire up VideoService.PublishVideo
         console.log('Publish video', { videoTitle, videoDescription, videoTags, selectedThumbnail, customThumb });
+        if (postType === 'video') {
+            setUploadPhase('metadata');               // open inline metadata form
+            // Here update the video details : parameters - title, description , tags, thumbnail
+            if (uploadedVideoId != 0 && uploadedVideoId != null && presignedObjectKey != null) {
+                const updateRes = await VideoService.UpdateVideo(uploadedVideoId, token, videoTitle, videoDescription, videoTags, selectedThumbnail, presignedObjectKey);
+                console.log("update video response :", updateRes)
+            } else {
+                toast("Video ID is null")
+            }
+        } else {
+            setUploadPhase('transcoding');             // show "waiting" state
+        }
 
-        // now get the post data
-        // now post video with all the details 
-        // saving both details at the same time in both post and video table 
-        // only post handle
+        // Refresh library
+        const libRes = await VideoService.GetAllVideos(token);
+        if (libRes?.Success) setAllVideos(libRes.VideoFiles);
+
         toast.success('Video published!');
         resetAll();
     };
@@ -382,7 +397,7 @@ const TranscodingPage = () => {
                                             }`}
                                     >
                                         <Upload size={15} />
-                                        {postType === 'shorts' ? 'Upload & Start Transcoding' : 'Upload & start transcoding'}
+                                        {postType === 'shorts' ? 'Upload & Start Transcoding' : 'Upload '}
                                     </button>
                                 )}
                             </div>
