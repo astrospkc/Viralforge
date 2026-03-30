@@ -1,5 +1,6 @@
 import axios from "axios";
 import baseUrl from "./api_service";
+import type { VideoPost } from "../../types";
 
 
 export type GetPresignedUrlResponse = {
@@ -35,7 +36,11 @@ type GetListOfVideoFilesResponse = {
     Code: number
 }
 
+
+
 export const VideoService = {
+
+
     async GetPresignedUrl(fileKey: { filename: string, contentType: string }, token: string): Promise<GetPresignedUrlResponse> {
         console.log("fileKey :", fileKey)
 
@@ -63,27 +68,55 @@ export const VideoService = {
         }
     },
 
-    async CreateVideo(filename: string, filetype: string, objectKey: string, token: string): Promise<VideoUploadResponse | null> {
+    async CreateVideo(
+        filename: string,
+        filetype: string,
+        objectKey: string,
+        token: string
+    ): Promise<VideoUploadResponse> {
+        console.log("[createVideo] called", {
+            filename,
+            filetype,
+            objectKey,
+        });
+
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+
         try {
-            console.log("filename, filetype, objectKey: ", filename, filetype, objectKey)
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
-            const response = await axios.post(
-                `${baseUrl}/v1/upload/commit`, { filename, filetype, objectKey }, config
+            const response = await axios.post<VideoUploadResponse>(
+                `${baseUrl}/v1/upload/commit`,
+                {
+                    filename,
+                    filetype,
+                    objectKey,
+                },
+                config
             );
-            console.log("create video response :", response.data)
+
+            console.log("[createVideo] success", response.data);
+
             return response.data;
-        } catch (error) {
-            console.error("error in creating video: ", error)
+        } catch (error: any) {
+            console.error("[createVideo] failed", {
+                message: error?.message,
+                status: error?.response?.status,
+                data: error?.response?.data,
+                stack: error?.stack,
+            });
+
             return {
                 Data: null,
-                Code: 500,
+                Code: error?.response?.status ?? 500,
                 Success: false,
-                Message: "Failed to create video"
-            }
+                Message:
+                    error?.response?.data?.message ??
+                    error?.message ??
+                    "Failed to create video",
+            };
         }
     },
 
@@ -95,7 +128,7 @@ export const VideoService = {
                 }
             };
             const response = await axios.get(
-                `${baseUrl}/v1`, config
+                `${baseUrl}/v1/videos`, config
             );
             console.log("get all videos response :", response.data)
             return response.data;
@@ -198,7 +231,7 @@ export const VideoService = {
                 }
             };
             const response = await axios.get(
-                `${baseUrl}/video/v1/status/${videoId}`,
+                `${baseUrl}/v1/videos/${videoId}/status`,
                 {
                     ...config,
                 }
@@ -216,7 +249,7 @@ export const VideoService = {
         }
     },
 
-    async UpdateVideo(videoId: number, token: string, videoTitle: string, videoDescription: string, videoTags: string[], selectedThumbnail: File | string | null, objectKey: string) {
+    async UpdateVideo(videoId: number, token: string, videoTitle: string, videoDescription: string, videoTags: string[], selectedThumbnail: File | string | null, action: string, objectKey: string) {
         try {
             const config = {
                 headers: {
@@ -229,6 +262,7 @@ export const VideoService = {
             formData.append('videoDescription', videoDescription);
             formData.append('videoTags', JSON.stringify(videoTags));
             formData.append("objectKey", objectKey);
+            formData.append("publish_status", action);
             if (selectedThumbnail) {
                 formData.append('selectedThumbnail', selectedThumbnail);
             }
@@ -254,7 +288,7 @@ export const VideoService = {
     // get all feeds
     // get your library 
 
-    async GetAllFeeds(cursor: string, limit: number, token: string) {
+    async GetAllFeeds(cursor: string, limit: number, token: string): Promise<VideoPost[] | null> {
         try {
             const config = {
                 headers: {
@@ -268,15 +302,11 @@ export const VideoService = {
 
             );
             console.log("get all feeds response :", response.data)
-            return response.data;
+
+            return response.data.data
         } catch (error) {
             console.error("error in getting all feeds: ", error)
-            return {
-                Data: null,
-                Code: 500,
-                Success: false,
-                Message: "Failed to get all feeds"
-            }
+            return null;
         }
     },
 

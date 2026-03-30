@@ -42,8 +42,12 @@ export type VideoPost = {
     duration: string;
     views: string;
     likes: number;
-    quality: string;
+    qualities: QualityOption[];
     tags: string[];
     reviews: Review[];
     time: string;
 };
+type QualityOption = {
+    cdnUrl: string
+    quality: string
+}

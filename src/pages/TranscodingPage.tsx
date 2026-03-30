@@ -10,6 +10,8 @@ import { VideoService, type VideoUpload } from '../services/video_service';
 import { useAuthStore } from '../store/auth_store';
 import toast from 'react-hot-toast';
 import TranscodeStatus from '../components/TranscodeStatus';
+import { useQuery } from '@tanstack/react-query';
+
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type PostType = 'video' | 'shorts';
@@ -52,6 +54,7 @@ const TranscodingPage = () => {
     const [customThumb, setCustomThumb] = useState<File | null>(null);
     const [customThumbPreview, setCustomThumbPreview] = useState<string | null>(null);
     const thumbInputRef = useRef<HTMLInputElement>(null);
+    const [publishStatus, setPublishStatus] = useState<string>("draft");
 
     // Shorts editor state (inline dropdown)
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -66,13 +69,15 @@ const TranscodingPage = () => {
     const [shortsTags, setShortsTags] = useState<string[]>([]);
     const [video_id, setVideo_Id] = useState<number | null>(null);
 
+
+
     // Library
     const [allVideos, setAllVideos] = useState<VideoUpload[] | null>(null);
 
     useEffect(() => {
-        const fetchVideos = async () => {
-            const response = await VideoService.GetAllVideos(token);
-            if (response?.Success) setAllVideos(response.VideoFiles);
+        const fetchVideos = () => {
+            // const response = await VideoService.GetAllVideos(token);
+            // if (response?.Success) setAllVideos(response.VideoFiles);
         };
         fetchVideos();
     }, [token]);
@@ -109,22 +114,37 @@ const TranscodingPage = () => {
     const clearFile = () => { setSelectedFile(null); setUploadPhase('idle'); setPendingDbSave(null); };
 
     // ------------polling for transcoding status ----------------------
-    useEffect(() => {
-        if (uploadPhase !== 'transcoding') return;
-        const interval = setInterval(async () => {
-            const res = await VideoService.GetTranscodeStatus(token, uploadedVideoId!);
-            if (res?.Success) {
-                if (res.Data?.transcode_status === 'completed') {
-                    toast.success('Transcoding completed');
-                    setUploadPhase('ready');
-                } else if (res.Data?.transcode_status === 'failed') {
-                    toast.error('Transcoding failed');
-                    setUploadPhase('failed');
-                }
+
+    console.log("uploaded video id : ", uploadedVideoId)
+    const { data: transcodedata } = useQuery({
+        queryKey: ["transcode-status", uploadedVideoId],
+        queryFn: () =>
+            VideoService.GetTranscodeStatus(token, uploadedVideoId!),
+        enabled: !!uploadedVideoId,
+        refetchInterval: (query) => {
+            console.log("query : ", query)
+            if (query?.state?.status === "error") {
+                return false;
             }
-        }, 5000);
-        return () => clearInterval(interval);
-    }, [uploadPhase, uploadedVideoId, token]);
+            const status = query?.state?.data?.Data?.transcode_status;
+            return status === "processing" ? 5000 : false;
+        },
+    });
+
+    useEffect(() => {
+        if (!transcodedata?.Data?.transcode_status) return;
+
+        const uploadStatus =
+            transcodedata.Data.transcode_status === "completed"
+                ? "ready"
+                : transcodedata.Data.transcode_status === "failed"
+                    ? "failed"
+                    : "transcoding";
+
+        setUploadPhase(uploadStatus);
+        resetAll()
+    }, [transcodedata]);
+
 
     // ── Upload ─────────────────────────────────────────────────────────────────
     const handleUpload = async () => {
@@ -155,7 +175,7 @@ const TranscodingPage = () => {
             const createRes = await VideoService.CreateVideo(
                 selectedFile.name, selectedFile.type, presigned.ObjectKey, token
             );
-            console.log("create video response :", createRes)
+            console.log("create video response in transcoding page :", createRes)
             if (createRes?.Success) {
                 toast.success('Uploaded! ' + (postType === 'video' ? 'Fill in details below.' : 'Transcoding started…'));
                 setPendingDbSave(null);
@@ -169,7 +189,7 @@ const TranscodingPage = () => {
                     console.log("videoId: ", videoId)
                     // Here update the video details : parameters - title, description , tags, thumbnail
                     if (videoId != 0 && videoId != null) {
-                        const updateRes = await VideoService.UpdateVideo(videoId, token, videoTitle, videoDescription, videoTags, selectedThumbnail, presigned.ObjectKey);
+                        const updateRes = await VideoService.UpdateVideo(videoId, token, videoTitle, videoDescription, videoTags, selectedThumbnail, publishStatus, presigned.ObjectKey);
                         console.log("update video response :", updateRes)
                     } else {
                         toast("Video ID is null")
@@ -226,7 +246,8 @@ const TranscodingPage = () => {
         setSelectedThumbnail(null);
         setCustomThumbPreview(URL.createObjectURL(file));
     };
-    const handleVideoPublish = async () => {
+    const handleVideoPublish = async (action: string) => {
+        setPublishStatus(action);
         if (!videoTitle.trim()) { toast.error('Title is required'); return; }
         // TODO: wire up VideoService.PublishVideo
         console.log('Publish video', { videoTitle, videoDescription, videoTags, selectedThumbnail, customThumb });
@@ -234,7 +255,7 @@ const TranscodingPage = () => {
             setUploadPhase('metadata');               // open inline metadata form
             // Here update the video details : parameters - title, description , tags, thumbnail
             if (uploadedVideoId != 0 && uploadedVideoId != null && presignedObjectKey != null) {
-                const updateRes = await VideoService.UpdateVideo(uploadedVideoId, token, videoTitle, videoDescription, videoTags, selectedThumbnail, presignedObjectKey);
+                const updateRes = await VideoService.UpdateVideo(uploadedVideoId, token, videoTitle, videoDescription, videoTags, selectedThumbnail, publishStatus, presignedObjectKey);
                 console.log("update video response :", updateRes)
             } else {
                 toast("Video ID is null")
@@ -248,7 +269,7 @@ const TranscodingPage = () => {
         if (libRes?.Success) setAllVideos(libRes.VideoFiles);
 
         toast.success('Video published!');
-        resetAll();
+
     };
 
     // ── Shorts editor helpers ──────────────────────────────────────────────────
@@ -328,7 +349,10 @@ const TranscodingPage = () => {
                 </div>
 
                 {/* ── Upload zone card ─────────────────────────────────────────── */}
-                <div className="flex flex-col gap-4">
+                <div
+                    className={`flex flex-col gap-4 ${uploadPhase === "transcoding" ? "pointer-events-none opacity-50" : ""
+                        }`}
+                >
 
                     {/* Drop zone or file card */}
                     {uploadPhase === 'idle' || uploadPhase === 'ready' ? (
@@ -461,7 +485,7 @@ const TranscodingPage = () => {
                             <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
                                 <div>
                                     <p className="text-red-500 text-[10px] font-semibold tracking-widest uppercase mb-0.5">Studio</p>
-                                    <h2 onClick={handleVideoPublish} className="text-base font-black text-white tracking-tight">Publish Video</h2>
+                                    <h2 className="text-base font-black text-white tracking-tight">Publish Video</h2>
                                 </div>
                                 <button
                                     onClick={resetAll}
@@ -590,7 +614,17 @@ const TranscodingPage = () => {
                                     Cancel
                                 </button>
                                 <button
-                                    onClick={handleVideoPublish}
+                                    onClick={() => handleVideoPublish("draft")}
+                                    disabled={!videoTitle.trim()}
+                                    className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${videoTitle.trim()
+                                        ? 'bg-red-600 hover:bg-red-700 text-white hover:shadow-lg hover:shadow-red-900/40'
+                                        : 'bg-white/5 text-gray-600 cursor-not-allowed'
+                                        }`}
+                                >
+                                    <Upload size={15} /> Save as Draft
+                                </button>
+                                <button
+                                    onClick={() => handleVideoPublish("publish")}
                                     disabled={!videoTitle.trim()}
                                     className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${videoTitle.trim()
                                         ? 'bg-red-600 hover:bg-red-700 text-white hover:shadow-lg hover:shadow-red-900/40'
@@ -605,7 +639,8 @@ const TranscodingPage = () => {
 
                     {/* ── SHORTS: transcoding wait state ────────────────────────── */}
                     {postType === 'shorts' && uploadPhase === 'transcoding' && (
-                        <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl overflow-hidden">
+                        <div className={`bg-[#1a1a1a] border border-white/8 rounded-2xl overflow-hidden ${uploadPhase == "transcoding" ? "pointer-events-none opacity-50" : ""
+                            }`}>
                             <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
                                 <div>
                                     <p className="text-red-500 text-[10px] font-semibold tracking-widest uppercase mb-0.5">Shorts</p>
