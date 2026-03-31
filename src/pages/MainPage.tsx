@@ -29,7 +29,6 @@ const CATEGORIES = [
 type CategoryId = typeof CATEGORIES[number]['id'];
 
 
-const Misc_Thumbnails = ['https://picsum.photos/seed/101/800/450']
 
 
 

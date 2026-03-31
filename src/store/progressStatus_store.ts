@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 
-type UploadPhase =
+export type UploadPhase =
     | 'idle'            // nothing selected
     | 'ready'           // file chosen, awaiting upload
     | 'uploading'       // sending to S3

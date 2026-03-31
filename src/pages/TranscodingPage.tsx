@@ -67,18 +67,12 @@ const TranscodingPage = () => {
     // Library
     // const [allVideos, setAllVideos] = useState<VideoUpload[] | null>(null);
 
-    useEffect(() => {
-        const fetchVideos = () => {
-            // const response = await VideoService.GetAllVideos(token);
-            // if (response?.Success) setAllVideos(response.VideoFiles);
-        };
-        fetchVideos();
-    }, [token]);
+
 
     // reset when switching tabs
-    useEffect(() => {
-        resetAll();
-    }, [postType]);
+    // useEffect(() => {
+    //     resetAll();
+    // }, [postType]);
 
     const resetAll = () => {
         setSelectedFile(null);
@@ -138,7 +132,7 @@ const TranscodingPage = () => {
                     : "transcoding";
 
         setUploadPhase(uploadStatus);
-        resetAll()
+        // resetAll()
     }, [transcodedata]);
 
 
@@ -160,13 +154,6 @@ const TranscodingPage = () => {
 
             setPendingDbSave({ filename: selectedFile.name, contentType: selectedFile.type, objectKey: presigned.ObjectKey });
 
-            // TODO: in createVideo() - add parameter:= title, description , tags, thumbnail
-            // one its done , transcode the video in the background process
-            // so basically click upload video :- createVideo and Transcode video runs
-            // transcoding result :- "processing", "completed" or "failed"
-            // processing - show processing modal
-            // completed - show completed modal
-            // failed - show failed modal - toast it
             setPresignedObjectKey(presigned.ObjectKey);
             const createRes = await VideoService.CreateVideo(
                 selectedFile.name, selectedFile.type, presigned.ObjectKey, token
@@ -181,7 +168,7 @@ const TranscodingPage = () => {
                 setUploadedFileUrl(createRes?.Data?.file_url ?? '');
 
                 if (postType === 'video') {
-                    setUploadPhase('metadata');               // open inline metadata form
+                    setUploadPhase("metadata");               // open inline metadata form
                     console.log("videoId: ", videoId)
                     // Here update the video details : parameters - title, description , tags, thumbnail
                     if (videoId != 0 && videoId != null) {
