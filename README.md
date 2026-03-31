@@ -74,3 +74,7 @@ This is a relatively simple application. Here's a quick overview of how the majo
 ---
 
 *Built with ❤️ by the ViralForge Team*
+
+
+
+

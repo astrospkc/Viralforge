@@ -7,12 +7,15 @@ import TranscodingPage from './pages/TranscodingPage';
 import { Toaster } from 'react-hot-toast';
 import { useAuthStore } from './store/auth_store';
 import PageNotFound from './pages/PageNotFound';
+import GlobalUploadProgress from './components/GlobalUploadProgress';
 
 function App() {
   const { isAuthenticated } = useAuthStore()
   return (
     <Router>
       <Toaster />
+      <GlobalUploadProgress />
+
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/signin" element={<SignIn />} />
@@ -25,7 +28,6 @@ function App() {
           :
 
           <Route path="/pageNotFound" element={<PageNotFound />} />
-
 
         }
 

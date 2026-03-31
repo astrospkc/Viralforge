@@ -10,20 +10,13 @@ import { VideoService, type VideoUpload } from '../services/video_service';
 import { useAuthStore } from '../store/auth_store';
 import toast from 'react-hot-toast';
 import TranscodeStatus from '../components/TranscodeStatus';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useUploadStore } from '../store/progressStatus_store';
 
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type PostType = 'video' | 'shorts';
-type UploadPhase =
-    | 'idle'            // nothing selected
-    | 'ready'           // file chosen, awaiting upload
-    | 'uploading'       // sending to S3
-    | 'transcoding'     // Shorts: waiting for transcode to finish
-    | 'metadata'        // Video: fill in metadata after upload
-    | 'editing'         // Shorts: clip editor
-    | 'done'         // upload complete
-    | 'failed';
+
 
 // ── Component ──────────────────────────────────────────────────────────────────
 const TranscodingPage = () => {
@@ -34,9 +27,9 @@ const TranscodingPage = () => {
 
 
     // File selection
+    const { uploadPhase, setUploadPhase } = useUploadStore()
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
-    const [uploadPhase, setUploadPhase] = useState<UploadPhase>('idle');
     const [pendingDbSave, setPendingDbSave] = useState<{ filename: string; contentType: string; objectKey: string } | null>(null);
 
     // After successful upload → we get a videoId to open the correct modal
@@ -72,7 +65,7 @@ const TranscodingPage = () => {
 
 
     // Library
-    const [allVideos, setAllVideos] = useState<VideoUpload[] | null>(null);
+    // const [allVideos, setAllVideos] = useState<VideoUpload[] | null>(null);
 
     useEffect(() => {
         const fetchVideos = () => {
@@ -132,7 +125,10 @@ const TranscodingPage = () => {
     });
 
     useEffect(() => {
-        if (!transcodedata?.Data?.transcode_status) return;
+        if (!transcodedata?.Data?.transcode_status) {
+            resetAll()
+            return
+        }
 
         const uploadStatus =
             transcodedata.Data.transcode_status === "completed"
@@ -199,8 +195,7 @@ const TranscodingPage = () => {
                 }
 
                 // Refresh library
-                const libRes = await VideoService.GetAllVideos(token);
-                if (libRes?.Success) setAllVideos(libRes.VideoFiles);
+                await refetchVideos();
             } else {
                 toast.error('Failed to save video');
                 setUploadPhase('ready');
@@ -246,31 +241,65 @@ const TranscodingPage = () => {
         setSelectedThumbnail(null);
         setCustomThumbPreview(URL.createObjectURL(file));
     };
-    const handleVideoPublish = async (action: string) => {
-        setPublishStatus(action);
-        if (!videoTitle.trim()) { toast.error('Title is required'); return; }
-        // TODO: wire up VideoService.PublishVideo
-        console.log('Publish video', { videoTitle, videoDescription, videoTags, selectedThumbnail, customThumb });
-        if (postType === 'video') {
-            setUploadPhase('metadata');               // open inline metadata form
-            // Here update the video details : parameters - title, description , tags, thumbnail
-            if (uploadedVideoId != 0 && uploadedVideoId != null && presignedObjectKey != null) {
-                const updateRes = await VideoService.UpdateVideo(uploadedVideoId, token, videoTitle, videoDescription, videoTags, selectedThumbnail, publishStatus, presignedObjectKey);
-                console.log("update video response :", updateRes)
-            } else {
-                toast("Video ID is null")
+    const { data: allVideos = [], refetch: refetchVideos } = useQuery({
+        queryKey: ["videos", token],
+        queryFn: async () => {
+            const res = await VideoService.GetAllVideos(token);
+            if (!res?.Success) throw new Error("Failed to fetch videos");
+            return res.VideoFiles;
+        },
+        enabled: !!token,
+    });
+
+    const publishMutation = useMutation({
+        mutationFn: async (action: string) => {
+            if (!uploadedVideoId || !presignedObjectKey) {
+                throw new Error("Video ID or object key missing");
             }
-        } else {
-            setUploadPhase('transcoding');             // show "waiting" state
+
+            return VideoService.UpdateVideo(
+                uploadedVideoId,
+                token,
+                videoTitle,
+                videoDescription,
+                videoTags,
+                selectedThumbnail,
+                action,
+                presignedObjectKey
+            );
+        },
+        onSuccess: async (res, action) => {
+            if (!res?.Success) {
+                toast.error("Failed to publish video");
+                return;
+            }
+
+            setPublishStatus(action);
+
+            if (postType === "video") {
+                setUploadPhase("metadata");
+            } else {
+                setUploadPhase("transcoding");
+            }
+
+            await refetchVideos();
+            toast.success("Video published successfully!");
+        },
+        onError: (error: any) => {
+            toast.error(error.message || "Something went wrong");
+        },
+    });
+
+    const handleVideoPublish = async (action: string) => {
+        if (!videoTitle.trim()) {
+            toast.error("Title is required");
+            return;
         }
 
-        // Refresh library
-        const libRes = await VideoService.GetAllVideos(token);
-        if (libRes?.Success) setAllVideos(libRes.VideoFiles);
-
-        toast.success('Video published!');
-
+        publishMutation.mutate(action);
     };
+    console.log("upload phase: ", uploadPhase)
+    console.log("all videos: ", allVideos)
 
     // ── Shorts editor helpers ──────────────────────────────────────────────────
     const handleTranscodingComplete = () => {
@@ -315,7 +344,9 @@ const TranscodingPage = () => {
         resetAll();
     };
 
-    const effectiveThumbnail = customThumbPreview ?? selectedThumbnail;
+    const Misc_Thumbnails = ['https://picsum.photos/seed/101/800/450']
+
+    const effectiveThumbnail = customThumbPreview ?? selectedThumbnail ?? Misc_Thumbnails[0];
 
     return (
         <div className="min-h-screen text-white font-sans antialiased" style={{ background: '#111' }}>
@@ -606,9 +637,10 @@ const TranscodingPage = () => {
                             </div>
 
                             {/* Footer */}
-                            <div className="px-6 py-4 border-t border-white/5 flex gap-3">
+                            <div className={`px-6 py-4 border-t border-white/5 flex gap-3`}>
                                 <button
                                     onClick={resetAll}
+
                                     className="flex-1 py-3 rounded-xl font-bold text-sm border border-white/10 bg-white/3 hover:bg-white/8 text-gray-400 hover:text-white transition-all"
                                 >
                                     Cancel
