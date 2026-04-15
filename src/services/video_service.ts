@@ -250,6 +250,7 @@ export const VideoService = {
     },
 
     async UpdateVideo(videoId: number, token: string, videoTitle: string, videoDescription: string, videoTags: string[], selectedThumbnail: File | string | null, action: string, objectKey: string) {
+        console.log("update video params: ", videoId, token, videoTitle, videoDescription, videoTags, selectedThumbnail, action, objectKey)
         try {
             const config = {
                 headers: {
@@ -258,13 +259,13 @@ export const VideoService = {
             };
             const formData = new FormData();
             // formData.append('videoId', videoId.toString());
-            formData.append('videoTitle', videoTitle);
-            formData.append('videoDescription', videoDescription);
-            formData.append('videoTags', JSON.stringify(videoTags));
-            formData.append("objectKey", objectKey);
+            formData.append('title', videoTitle);
+            formData.append('description', videoDescription);
+            formData.append('tags', JSON.stringify(videoTags));
+            formData.append("object_key", objectKey);
             formData.append("publish_status", action);
             if (selectedThumbnail) {
-                formData.append('selectedThumbnail', selectedThumbnail);
+                formData.append('thumbnail', selectedThumbnail);
             }
             const response = await axios.put(
                 `${baseUrl}/v1/videos/${videoId}`,
@@ -337,6 +338,29 @@ export const VideoService = {
         }
     },
 
+    async DeleteVideo(videoId: number, token: string) {
+        try {
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            };
+            const response = await axios.delete(
+                `${baseUrl}/v1/videos/${videoId}`,
+                config,
+            );
+            console.log("delete video response :", response.data)
+            return response.data;
+        } catch (error) {
+            console.error("error in deleting video: ", error)
+            return {
+                Data: null,
+                Code: 500,
+                Success: false,
+                Message: "Failed to delete video"
+            }
+        }
+    }
 
 
 

@@ -61,6 +61,28 @@ const TranscodingPage = () => {
     const [shortsTagInput, setShortsTagInput] = useState('');
     const [shortsTags, setShortsTags] = useState<string[]>([]);
     const [video_id, setVideo_Id] = useState<number | null>(null);
+    const [disableButton, setDisableButton] = useState<boolean>(false);
+    const [disableConfirmButton, setDisableConfirmButton] = useState<boolean>(false);
+
+    // ref
+    const titleRef = useRef<HTMLInputElement>(null)
+    const descriptionRef = useRef<HTMLTextAreaElement>(null)
+    const tagRef = useRef<HTMLInputElement>(null)
+
+    const handleVideoTagKey = (
+        e: React.KeyboardEvent<HTMLInputElement>
+    ) => {
+        if (e.key !== "Enter") return;
+        e.preventDefault();
+
+        const newTag = tagRef.current?.value.trim();
+
+        if (!newTag) return;
+
+        setVideoTags(prev => [...prev, newTag]);
+
+        if (tagRef.current) tagRef.current.value = "";
+    };
 
 
 
@@ -114,27 +136,25 @@ const TranscodingPage = () => {
                 return false;
             }
             const status = query?.state?.data?.Data?.transcode_status;
-            return status === "processing" ? 5000 : false;
+            return status === "processing" || status === "uploading" ? 5000 : false;
         },
-    });
+        onSuccess: (data) => {
+            const status = data?.Data?.transcode_status;
+            if (!status) {
+                return
+            }
+            if (status === "completed") {
+                toast.success("Video ready 🎉");
+                setUploadPhase("ready");
+            }
 
-    useEffect(() => {
-        if (!transcodedata?.Data?.transcode_status) {
-            resetAll()
-            return
+            if (status === "failed") {
+                toast.error("Transcoding failed");
+                setUploadPhase("failed");
+            }
         }
-
-        const uploadStatus =
-            transcodedata.Data.transcode_status === "completed"
-                ? "ready"
-                : transcodedata.Data.transcode_status === "failed"
-                    ? "failed"
-                    : "transcoding";
-
-        setUploadPhase(uploadStatus);
-        // resetAll()
-    }, [transcodedata]);
-
+    });
+    console.log("transoced data: ", transcodedata)
 
     // ── Upload ─────────────────────────────────────────────────────────────────
     const handleUpload = async () => {
@@ -159,7 +179,7 @@ const TranscodingPage = () => {
                 selectedFile.name, selectedFile.type, presigned.ObjectKey, token
             );
             console.log("create video response in transcoding page :", createRes)
-            if (createRes?.Success) {
+            if (createRes?.Success && createRes?.Data?.id != null) {
                 toast.success('Uploaded! ' + (postType === 'video' ? 'Fill in details below.' : 'Transcoding started…'));
                 setPendingDbSave(null);
                 const videoId = createRes?.Data?.id ?? null;
@@ -167,22 +187,19 @@ const TranscodingPage = () => {
                 setUploadedVideoId(videoId);
                 setUploadedFileUrl(createRes?.Data?.file_url ?? '');
 
+
                 if (postType === 'video') {
-                    setUploadPhase("metadata");               // open inline metadata form
-                    console.log("videoId: ", videoId)
-                    // Here update the video details : parameters - title, description , tags, thumbnail
-                    if (videoId != 0 && videoId != null) {
-                        const updateRes = await VideoService.UpdateVideo(videoId, token, videoTitle, videoDescription, videoTags, selectedThumbnail, publishStatus, presigned.ObjectKey);
-                        console.log("update video response :", updateRes)
-                    } else {
-                        toast("Video ID is null")
-                    }
+                    console.log("I am here 1")
+                    setUploadPhase("metadata");
+                    setPresignedObjectKey(presigned.ObjectKey)
+                    setVideo_Id(videoId)          // open inline metadata form
+
                 } else {
                     setUploadPhase('transcoding');             // show "waiting" state
                 }
 
                 // Refresh library
-                await refetchVideos();
+                // await refetchVideos();
             } else {
                 toast.error('Failed to save video');
                 setUploadPhase('ready');
@@ -191,8 +208,6 @@ const TranscodingPage = () => {
             toast.error('Upload failed');
             setUploadPhase('ready');
         }
-
-
     };
 
     const handleRetryDbSave = async () => {
@@ -213,14 +228,16 @@ const TranscodingPage = () => {
     };
 
     // ── Video metadata helpers ─────────────────────────────────────────────────
-    const addVideoTag = () => {
-        const t = videoTagInput.trim();
-        if (t && !videoTags.includes(t)) setVideoTags(prev => [...prev, t]);
-        setVideoTagInput('');
-    };
-    const handleVideoTagKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addVideoTag(); }
-    };
+    // const addVideoTag = () => {
+    //     const t = videoTagInput.trim();
+    //     if (t && !videoTags.includes(t)) setVideoTags(prev => [...prev, t]);
+    //     setVideoTagInput('');
+    // };
+
+    //  const handleVideoTagKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    //     if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addVideoTag(); }
+    // };
+
     const handleCustomThumb = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -277,16 +294,32 @@ const TranscodingPage = () => {
         },
     });
 
-    const handleVideoPublish = async (action: string) => {
-        if (!videoTitle.trim()) {
-            toast.error("Title is required");
-            return;
-        }
-
+    const handleVideoPublish = (action: string) => {
+        setDisableButton(true);
+        setDisableConfirmButton(false);
+        console.log("titleRef.current?.value: ", titleRef.current?.value)
+        setVideo_Id(video_id)
+        setPresignedObjectKey(presignedObjectKey)
+        setSelectedThumbnail(selectedThumbnail)
+        setVideoTitle(titleRef.current?.value || "");
+        setVideoDescription(descriptionRef.current?.value || "");
+        setPublishStatus(action);
         publishMutation.mutate(action);
+    }
+
+    const handleConfirm = async () => {
+        console.log("title, desc, tags, thumbnai, status: ", videoTitle, videoDescription, videoTags, selectedThumbnail, publishStatus, presignedObjectKey)
+        setDisableConfirmButton(true);
+        setDisableButton(true);
+        // Here update the video details : parameters - title, description , tags, thumbnail
+        if (video_id != 0 && video_id != null) {
+            const updateRes = await VideoService.UpdateVideo(video_id, token, videoTitle, videoDescription, videoTags, selectedThumbnail, publishStatus, presignedObjectKey!);
+            console.log("update video response :", updateRes)
+        } else {
+            toast("Video ID is null")
+        }
     };
-    console.log("upload phase: ", uploadPhase)
-    console.log("all videos: ", allVideos)
+
 
     // ── Shorts editor helpers ──────────────────────────────────────────────────
     const handleTranscodingComplete = () => {
@@ -439,7 +472,7 @@ const TranscodingPage = () => {
                                             }`}
                                     >
                                         <Upload size={15} />
-                                        {postType === 'shorts' ? 'Upload & Start Transcoding' : 'Upload '}
+                                        {postType === 'video' ? 'Upload & Start Transcoding' : 'Upload '}
                                     </button>
                                 )}
                             </div>
@@ -572,8 +605,10 @@ const TranscodingPage = () => {
                                     <div>
                                         <label className="block text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-1.5">Title *</label>
                                         <input
-                                            value={videoTitle}
-                                            onChange={e => setVideoTitle(e.target.value)}
+                                            // value={videoTitle}
+                                            ref={titleRef}
+                                            type='text'
+                                            // onChange={e => setVideoTitle(e.target.value)}
                                             placeholder="Give your video a title…"
                                             className="w-full bg-white/5 border border-white/8 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-red-600/50 focus:bg-red-600/3 transition-colors"
                                         />
@@ -583,8 +618,10 @@ const TranscodingPage = () => {
                                     <div>
                                         <label className="block text-[10px] font-semibold uppercase tracking-widest text-gray-500 mb-1.5">Description</label>
                                         <textarea
-                                            value={videoDescription}
-                                            onChange={e => setVideoDescription(e.target.value)}
+                                            // value={videoDescription}
+                                            ref={descriptionRef}
+
+                                            // onChange={e => setVideoDescription(e.target.value)}
                                             placeholder="What is this video about?"
                                             rows={4}
                                             className="w-full bg-white/5 border border-white/8 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600 resize-none focus:outline-none focus:border-red-600/50 transition-colors"
@@ -607,52 +644,76 @@ const TranscodingPage = () => {
                                         <div className="flex gap-2">
                                             <input
                                                 value={videoTagInput}
+                                                ref={tagRef}
                                                 onChange={e => setVideoTagInput(e.target.value)}
                                                 onKeyDown={handleVideoTagKey}
                                                 placeholder="Add tag, press Enter…"
                                                 className="flex-1 bg-white/5 border border-white/8 rounded-xl px-4 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-red-600/50 transition-colors"
                                             />
-                                            <button
+                                            {/* <button
                                                 onClick={addVideoTag}
                                                 className="px-3 py-2 bg-white/5 border border-white/8 rounded-xl text-xs text-gray-400 hover:text-white hover:border-white/20 transition-colors"
                                             >
                                                 Add
-                                            </button>
+                                            </button> */}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
                             {/* Footer */}
-                            <div className={`px-6 py-4 border-t border-white/5 flex gap-3`}>
-                                <button
-                                    onClick={resetAll}
+                            {disableButton == true && disableConfirmButton == false &&
 
-                                    className="flex-1 py-3 rounded-xl font-bold text-sm border border-white/10 bg-white/3 hover:bg-white/8 text-gray-400 hover:text-white transition-all"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={() => handleVideoPublish("draft")}
-                                    disabled={!videoTitle.trim()}
-                                    className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${videoTitle.trim()
-                                        ? 'bg-red-600 hover:bg-red-700 text-white hover:shadow-lg hover:shadow-red-900/40'
-                                        : 'bg-white/5 text-gray-600 cursor-not-allowed'
-                                        }`}
-                                >
-                                    <Upload size={15} /> Save as Draft
-                                </button>
-                                <button
-                                    onClick={() => handleVideoPublish("publish")}
-                                    disabled={!videoTitle.trim()}
-                                    className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${videoTitle.trim()
-                                        ? 'bg-red-600 hover:bg-red-700 text-white hover:shadow-lg hover:shadow-red-900/40'
-                                        : 'bg-white/5 text-gray-600 cursor-not-allowed'
-                                        }`}
-                                >
-                                    <Upload size={15} /> Publish Video
-                                </button>
-                            </div>
+                                <div className={`px-6 py-4 border-t border-white/5 flex gap-3`}>
+                                    <button
+                                        onClick={handleConfirm}
+                                        // disabled={!videoTitle.trim()}
+                                        className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all bg-red-600 hover:bg-red-700 text-white hover:shadow-lg hover:shadow-red-900/40'
+                                         
+                                            }`}
+                                    >
+                                        <Upload size={15} /> Confirm Publish
+                                    </button>
+                                    <button
+                                        onClick={resetAll}
+
+                                        className="flex-1 py-3 rounded-xl font-bold text-sm border border-white/10 bg-white/3 hover:bg-white/8 text-gray-400 hover:text-white transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+
+                                </div>
+
+
+                            }
+                            {disableButton == true ?
+                                <> </> :
+                                <div className={`px-6 py-4 border-t border-white/5 flex gap-3`}>
+                                    <button
+                                        onClick={resetAll}
+
+                                        className="flex-1 py-3 rounded-xl font-bold text-sm border border-white/10 bg-white/3 hover:bg-white/8 text-gray-400 hover:text-white transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => handleVideoPublish("draft")}
+                                        // disabled={!videoTitle.trim()}
+                                        className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all bg-red-600 hover:bg-red-700 text-white hover:shadow-lg hover:shadow-red-900/40 bg-white/5 text-gray-600 cursor-not-allowed'
+                                            }`}
+                                    >
+                                        <Upload size={15} /> Save as Draft
+                                    </button>
+                                    <button
+                                        onClick={() => handleVideoPublish("published")}
+                                        // disabled={!videoTitle.trim()}
+                                        className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all bg-red-600 hover:bg-red-700 text-white hover:shadow-lg hover:shadow-red-900/40'
+                                         
+                                            }`}
+                                    >
+                                        <Upload size={15} /> Publish Video
+                                    </button>
+                                </div>
+                            }
                         </div>
                     )}
 

@@ -51,6 +51,34 @@ export const useUploadStore = create<UploadStore>((set) => ({
                 progress: 0
             }
         }
+        if (phase === "done") {
+            return {
+                uploadPhase: phase,
+                isVisible: true,
+                progress: 100
+            }
+        }
+        if (phase === "uploading") {
+            return {
+                uploadPhase: phase,
+                isVisible: true,
+                progress: state.progress > 5 ? state.progress : 5
+            }
+        }
+        if (phase === "metadata") {
+            return {
+                uploadPhase: phase,
+                isVisible: true,
+                progress: state.progress > 5 ? state.progress : 5
+            }
+        }
+        if (phase === "editing") {
+            return {
+                uploadPhase: phase,
+                isVisible: true,
+                progress: state.progress > 5 ? state.progress : 5
+            }
+        }
 
         return {
             uploadPhase: phase,
