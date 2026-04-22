@@ -12,7 +12,9 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { VideoService } from '../services/video_service';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { CommentService } from '../services/comment_service';
+import type { Comment } from '../../types';
 
 
 const CATEGORIES = [
@@ -27,12 +29,6 @@ const CATEGORIES = [
 ] as const;
 
 type CategoryId = typeof CATEGORIES[number]['id'];
-
-
-
-
-
-
 
 /* ─────────────────────────────────────────
    Star Rating
@@ -70,25 +66,26 @@ const ReviewThread = ({ videoId: _videoId, reviews: initialReviews, userName }:
     const [reviews, setReviews] = useState(initialReviews);
     const [helpful, setHelpful] = useState<Record<number, boolean>>({});
     const [newRating, setNewRating] = useState(0);
-    const [newComment, setNewComment] = useState('');
+    const [newComment, setNewComment] = useState<Comment | null>(null);
     const commentRef = useRef<HTMLTextAreaElement>(null);
 
     const avgRating = reviews?.length ? Math.round(reviews.reduce((a, r) => a + r.rating, 0) / reviews.length) : 0;
 
     const submitReview = () => {
-        if (!newRating || !newComment.trim()) return;
+        console.log("new comment: ", newComment)
+        if (!newRating || !newComment?.content?.trim()) return;
         const r: Review = {
-            id: Date.now(), userId: 99, userName, avatar: 'https://i.pravatar.cc/36?img=33',
-            rating: newRating, comment: newComment.trim(), helpful: 0, time: 'just now',
+            id: Date.now(), userId: newComment.userId, userName, avatar: 'https://i.pravatar.cc/36?img=33',
+            rating: newRating, comment: newComment?.content?.trim(),
         };
         setReviews(prev => [r, ...prev]);
         setNewRating(0);
-        setNewComment('');
+        setNewComment(null);
     };
 
     const toggleHelpful = (id: number) => {
         setHelpful(p => ({ ...p, [id]: !p[id] }));
-        setReviews(prev => prev.map(r => r.id === id ? { ...r, helpful: helpful[id] ? r.helpful - 1 : r.helpful + 1 } : r));
+        setReviews(prev => prev.map(r => r.id === id ? { ...r } : r));
     };
 
     return (
@@ -139,14 +136,14 @@ const ReviewThread = ({ videoId: _videoId, reviews: initialReviews, userName }:
                     </div>
 
                     {/* Existing reviews */}
-                    {reviews.map(r => (
+                    {reviews && reviews.map(r => (
                         <div key={r.id} className="flex gap-3">
                             <img src={r.avatar} alt={r.userName} className="w-8 h-8 rounded-full shrink-0 mt-0.5" />
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                                     <span className="text-xs font-bold text-white">{r.userName}</span>
                                     <StarRating value={r.rating} size={11} />
-                                    <span className="text-gray-600 text-[10px] ml-auto">{r.time}</span>
+                                    {/* <span className="text-gray-600 text-[10px] ml-auto">{r.time}</span> */}
                                 </div>
                                 <p className="text-gray-300 text-xs leading-relaxed mb-2">"{r.comment}"</p>
                                 <button
@@ -154,9 +151,9 @@ const ReviewThread = ({ videoId: _videoId, reviews: initialReviews, userName }:
                                     className="flex items-center gap-1 group"
                                 >
                                     <ThumbsUp size={12} className={helpful[r.id] ? 'text-blue-400 fill-blue-400' : 'text-gray-600 group-hover:text-blue-400 transition-colors'} />
-                                    <span className={`text-[10px] transition-colors ${helpful[r.id] ? 'text-blue-400' : 'text-gray-600'}`}>
+                                    {/* <span className={`text-[10px] transition-colors ${helpful[r.id] ? 'text-blue-400' : 'text-gray-600'}`}>
                                         {r.helpful} helpful
-                                    </span>
+                                    </span> */}
                                 </button>
                             </div>
                         </div>
@@ -177,8 +174,15 @@ const VideoPostCard = ({ post, currentUserName }: { post: VideoPost; currentUser
     const [playing, setPlaying] = useState(false);
     const [showShare, setShowShare] = useState(false);
 
+    const token = useAuthStore((state) => state.token);
     const toggleLike = () => { setLiked(p => !p); setLikes(p => liked ? p - 1 : p + 1); };
     const fmtLikes = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
+
+    const video_id = post.id
+    const { data: comments } = useQuery({
+        queryKey: ["comments", video_id],
+        queryFn: () => CommentService.getComments(video_id, token)
+    })
 
     return (
         <article className="bg-[#1a1a1a] rounded-2xl overflow-hidden border border-white/5 hover:border-white/10 transition-all duration-300 group">

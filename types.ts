@@ -25,9 +25,27 @@ export type Review = {
     avatar: string;
     rating: number;
     comment: string;
-    helpful: number;
-    time: string;
 };
+// TODO: in this make sure in the response of comment we get the user name and avatar
+
+export type Comment = {
+    id: number;
+    videoId: number;
+    userId: number;
+    userName: string;
+    avatar: string;
+    parentCommentId: number;
+    rootCommentId: number;
+    depth: number;
+    content: string;
+    likeCount: number;
+    replyCount: number;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string;
+    user: User;
+}
 
 export type VideoPost = {
     id: number;
