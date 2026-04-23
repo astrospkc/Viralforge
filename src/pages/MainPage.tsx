@@ -66,21 +66,22 @@ const ReviewThread = ({ videoId: _videoId, reviews: initialReviews, userName }:
     const [reviews, setReviews] = useState(initialReviews);
     const [helpful, setHelpful] = useState<Record<number, boolean>>({});
     const [newRating, setNewRating] = useState(0);
-    const [newComment, setNewComment] = useState<Comment | null>(null);
+    const [newComment, setNewComment] = useState<string | undefined>();
     const commentRef = useRef<HTMLTextAreaElement>(null);
 
     const avgRating = reviews?.length ? Math.round(reviews.reduce((a, r) => a + r.rating, 0) / reviews.length) : 0;
 
     const submitReview = () => {
         console.log("new comment: ", newComment)
-        if (!newRating || !newComment?.content?.trim()) return;
+        if (!newRating || !newComment?.trim()) return;
+        // TODO: call api to submit review
         const r: Review = {
-            id: Date.now(), userId: newComment.userId, userName, avatar: 'https://i.pravatar.cc/36?img=33',
-            rating: newRating, comment: newComment?.content?.trim(),
+            id: Date.now(), userId: 99, userName, avatar: 'https://i.pravatar.cc/36?img=33',
+            rating: newRating, comment: newComment?.trim(),
         };
         setReviews(prev => [r, ...prev]);
         setNewRating(0);
-        setNewComment(null);
+        setNewComment('');
     };
 
     const toggleHelpful = (id: number) => {
@@ -127,7 +128,7 @@ const ReviewThread = ({ videoId: _videoId, reviews: initialReviews, userName }:
                         <div className="flex justify-end mt-2">
                             <button
                                 onClick={submitReview}
-                                disabled={!newRating || !newComment.trim()}
+                                disabled={!newRating || !newComment?.trim()}
                                 className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-bold px-4 py-2 rounded-lg transition-all"
                             >
                                 <Send size={12} /> Submit Review
