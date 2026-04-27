@@ -10,6 +10,7 @@ export type AuthState = {
     logout: () => void;
 }
 
+
 export type User = {
     id: string;
     name: string;
@@ -18,16 +19,26 @@ export type User = {
     updatedAt: string;
 }
 
-export type Review = {
+
+// TODO: in this make sure in the response of comment we get the user name and avatar
+
+export type Comment = {
     id: number;
+    videoId: number;
     userId: number;
-    userName: string;
-    avatar: string;
+    parentCommentId: number;
+    rootCommentId: number;
+    depth: number;
+    content: string;
+    likeCount: number;
+    replyCount: number;
     rating: number;
-    comment: string;
-    helpful: number;
-    time: string;
-};
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string;
+    user: User;
+}
 
 export type VideoPost = {
     id: number;

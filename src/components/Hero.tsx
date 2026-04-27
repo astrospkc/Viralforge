@@ -1,8 +1,10 @@
 import { ArrowRight, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/auth_store';
 
 const Hero = () => {
     const navigate = useNavigate();
+    const { isAuthenticated } = useAuthStore()
 
     return (
         <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
@@ -61,14 +63,17 @@ const Hero = () => {
 
                 {/* CTA buttons */}
                 <div className="flex flex-col sm:flex-row gap-4 items-center">
-                    <button
-                        onClick={() => navigate('/signup')}
-                        style={{ background: 'linear-gradient(135deg, #E50914, #c2185b)' }}
-                        className="group flex items-center gap-2 text-white px-8 py-4 rounded-lg font-semibold text-base transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-red-900/50"
-                    >
-                        Start Creating Free
-                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                    </button>
+                    {!isAuthenticated &&
+                        <button
+                            onClick={() => navigate('/signup')}
+                            style={{ background: 'linear-gradient(135deg, #E50914, #c2185b)' }}
+                            className="group flex items-center gap-2 text-white px-8 py-4 rounded-lg font-semibold text-base transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-red-900/50"
+                        >
+                            Start Creating Free
+                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                        </button>
+                    }
+
                     <button
                         onClick={() => navigate('/browse')}
                         className="flex items-center gap-2 text-gray-300 hover:text-white border border-white/15 hover:border-red-500/50 px-8 py-4 rounded-lg font-medium text-base transition-all duration-300 backdrop-blur-sm"

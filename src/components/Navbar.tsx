@@ -7,12 +7,14 @@ const Navbar = () => {
     const location = useLocation();
     const isAuthPage = location.pathname === '/signin' || location.pathname === '/signup';
     const { setToken } = useAuthStore()
+    const { isAuthenticated, setIsAuthenticated } = useAuthStore()
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setToken('');
         window.location.href = '/';
+        setIsAuthenticated(false)
     }
     useEffect(() => {
         const handleScroll = () => {
@@ -45,7 +47,7 @@ const Navbar = () => {
                 </Link>
 
                 <div>
-                    {location.pathname === '/' ? (
+                    {!isAuthenticated && location.pathname === '/' ? (
                         <Link to="/signin" className="bg-[#E50914] text-white px-4 py-1.5 rounded-sm font-medium hover:bg-[#c11119] transition text-sm">
                             Sign In
                         </Link>
