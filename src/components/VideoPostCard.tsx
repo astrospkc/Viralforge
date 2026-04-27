@@ -25,6 +25,8 @@ const VideoPostCard = ({ post, currentUserName }: { post: VideoPost; currentUser
         queryFn: () => CommentService.getTopLevelComments(video_id, token)
     })
 
+    console.log("video post details: ", post)
+
 
 
     return (
