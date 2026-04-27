@@ -2,6 +2,7 @@ import axios from "axios";
 import baseUrl from "./api_service";
 
 export const CommentService = {
+
     async getTopLevelComments(videoId: number, token: string) {
         try {
             const config = {
@@ -25,8 +26,9 @@ export const CommentService = {
             }
         }
     },
-    async postComment(videoId: number, token: string, comment: string) {
+    async postComment(videoId: number, token: string, comment: string, rating: number) {
         try {
+            console.log("comment: ", comment)
             const config = {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -35,7 +37,10 @@ export const CommentService = {
             // here we need , both root_comment_id and parent_comment_id
             const response = await axios.post(
                 `${baseUrl}/v1/videos/comments/${videoId}`,
-                { comment },
+                {
+                    content: comment,
+                    rating: rating
+                },
                 config
             );
             console.log("post comment response :", response.data)
