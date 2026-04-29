@@ -13,10 +13,15 @@ interface MyPlayerProps {
 
 export const VideoPlayer = ({ src }: MyPlayerProps) => {
     return (
-        <Player.Provider>
-            <VideoSkin>
-                <HlsVideo src={src} />
-            </VideoSkin>
-        </Player.Provider>
+        <div className="w-full h-full bg-black flex items-center justify-center">
+            <Player.Provider>
+                <VideoSkin>
+                    <HlsVideo 
+                        src={src} 
+                        className="w-full h-full"
+                    />
+                </VideoSkin>
+            </Player.Provider>
+        </div>
     );
-};
+};

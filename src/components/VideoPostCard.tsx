@@ -1,16 +1,17 @@
-import { Bookmark, CheckCircle, Heart, MessageCircle, MoreHorizontal, Play, Share2, X } from "lucide-react";
+import { Bookmark, CheckCircle, Heart, MessageCircle, MoreHorizontal, Play, Share2 } from "lucide-react";
 import ReviewThread from "./ReviewThread";
 import { CommentService } from "../services/comment_service";
 import { useAuthStore } from "../store/auth_store";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import type { VideoPost } from "../../types";
+import VideoModal from "./VideoModal";
 
 const VideoPostCard = ({ post, currentUserName }: { post: VideoPost; currentUserName: string }) => {
     const [liked, setLiked] = useState(false);
     const [likes, setLikes] = useState(post.likes);
     const [saved, setSaved] = useState(false);
-    const [playing, setPlaying] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
     const [showShare, setShowShare] = useState(false);
 
     // for this initial review section , we can use zustand for this and later at stage we can memoize it.
@@ -66,12 +67,12 @@ const VideoPostCard = ({ post, currentUserName }: { post: VideoPost; currentUser
             </div>
 
             {/* ── Thumbnail / Player ── */}
-            <div className="relative aspect-video overflow-hidden cursor-pointer" onClick={() => setPlaying(true)}>
+            <div className="relative aspect-video overflow-hidden cursor-pointer" onClick={() => setModalOpen(true)}>
                 <img
                     src={post?.thumbnail}
                     alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                    style={{ filter: playing ? 'brightness(0.2)' : 'brightness(0.85)' }}
+                    className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
+                    style={{ filter: 'brightness(0.85)' }}
                 />
                 {/* Quality badge */}
                 <span className="absolute top-3 left-3 bg-black/70 border border-white/20 text-white text-xs px-2 py-0.5 rounded font-bold backdrop-blur-sm">
@@ -86,24 +87,11 @@ const VideoPostCard = ({ post, currentUserName }: { post: VideoPost; currentUser
                     {post.views} views
                 </span>
                 {/* Play overlay */}
-                {!playing && (
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="w-14 h-14 bg-red-600/90 rounded-full flex items-center justify-center shadow-xl shadow-red-900/50 hover:scale-110 transition-transform">
-                            <Play size={24} className="fill-white text-white ml-1" />
-                        </div>
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/20 backdrop-blur-[2px]">
+                    <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-2xl shadow-red-900/40 hover:scale-110 hover:bg-red-500 transition-all duration-300">
+                        <Play size={28} className="fill-white text-white ml-1" />
                     </div>
-                )}
-                {playing && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                        <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center animate-pulse">
-                            <Play size={24} className="fill-white ml-1" />
-                        </div>
-                        <p className="text-sm text-gray-300 font-medium">Playing via HLS stream…</p>
-                        <button onClick={e => { e.stopPropagation(); setPlaying(false); }} className="text-gray-500 hover:text-white text-xs flex items-center gap-1 transition-colors">
-                            <X size={12} /> Close
-                        </button>
-                    </div>
-                )}
+                </div>
             </div>
 
             {/* ── Engagement Bar ── */}
@@ -152,6 +140,15 @@ const VideoPostCard = ({ post, currentUserName }: { post: VideoPost; currentUser
             <div className="px-4 pb-4">
                 <ReviewThread videoId={post.id} token={token} />
             </div>
+
+            {/* ── Video Modal ── */}
+            {modalOpen && (
+                <VideoModal
+                    post={post}
+                    token={token}
+                    onClose={() => setModalOpen(false)}
+                />
+            )}
         </article>
     );
 };

@@ -54,8 +54,9 @@ export type VideoPost = {
     views: string;
     likes: number;
     qualities: QualityOption[];
+    masterCdnUrl: string;
     tags: string[];
-    reviews: Review[];
+    reviews: Comment[];
     time: string;
 };
 type QualityOption = {

@@ -6,6 +6,7 @@ export type VideoQualityStatus = {
     id: number,
     video_upload_id: number,
     user_id: number,
+    master_cdn_url: string,
     quality: string,
     codec: string,
     bitrate: string,
