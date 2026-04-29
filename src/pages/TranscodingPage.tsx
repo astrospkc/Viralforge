@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import TranscodeStatus from '../components/TranscodeStatus';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useUploadStore } from '../store/progressStatus_store';
+import CustomVideoPlayer from '../components/CustomVideoPlayer';
 
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -63,6 +64,11 @@ const TranscodingPage = () => {
     const [video_id, setVideo_Id] = useState<number | null>(null);
     const [disableButton, setDisableButton] = useState<boolean>(false);
     const [disableConfirmButton, setDisableConfirmButton] = useState<boolean>(false);
+
+    // Library panel state
+    const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
+    const [selectedVideo, setSelectedVideo] = useState<VideoUpload | null>(null);
+    const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
 
     // ref
     const titleRef = useRef<HTMLInputElement>(null)
@@ -964,67 +970,208 @@ const TranscodingPage = () => {
                     )}
                 </div>
 
-                {/* ── Uploaded videos library ──────────────────────────────────── */}
+                {/* ── Your Videos library ──────────────────────────────────── */}
                 {allVideos && allVideos.length > 0 && (
-                    <div className="mt-12">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Clock size={14} className="text-gray-500" />
-                            <h2 className="text-sm font-bold text-white">Your Uploads</h2>
-                            <span className="ml-auto text-xs text-gray-600">{allVideos.length} file{allVideos.length !== 1 ? 's' : ''}</span>
+                    <div className="mt-14">
+                        {/* Section header + filter dropdown */}
+                        <div className="flex items-center gap-3 mb-5">
+                            <div>
+                                <p className="text-[10px] font-semibold text-red-500 uppercase tracking-[0.2em] mb-0.5">Library</p>
+                                <h2 className="text-base font-black text-white tracking-tight">Your Videos</h2>
+                            </div>
+
+                            {/* Filter dropdown */}
+                            <div className="relative ml-auto">
+                                <button
+                                    onClick={() => setFilterDropdownOpen(o => !o)}
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/8 border border-white/8 hover:border-white/15 rounded-lg text-xs text-gray-300 font-semibold transition-all"
+                                >
+                                    <span
+                                        className={`w-1.5 h-1.5 rounded-full ${
+                                            statusFilter === 'published' ? 'bg-green-400' :
+                                            statusFilter === 'draft'     ? 'bg-yellow-400' :
+                                            'bg-gray-500'
+                                        }`}
+                                    />
+                                    {statusFilter === 'all' ? 'All posts' : statusFilter === 'published' ? 'Published' : 'Drafts'}
+                                    <ChevronRight
+                                        size={12}
+                                        className={`text-gray-500 transition-transform duration-200 ${
+                                            filterDropdownOpen ? 'rotate-90' : ''
+                                        }`}
+                                    />
+                                </button>
+                                {filterDropdownOpen && (
+                                    <div
+                                        className="absolute right-0 top-full mt-1.5 w-36 rounded-xl overflow-hidden border border-white/10 shadow-2xl z-20"
+                                        style={{ background: '#1c1c1c' }}
+                                    >
+                                        {(['all', 'published', 'draft'] as const).map(opt => (
+                                            <button
+                                                key={opt}
+                                                onClick={() => { setStatusFilter(opt); setFilterDropdownOpen(false); setSelectedVideo(null); }}
+                                                className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold transition-colors ${
+                                                    statusFilter === opt
+                                                        ? 'text-white bg-white/8'
+                                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                                }`}
+                                            >
+                                                <span
+                                                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                                        opt === 'published' ? 'bg-green-400' :
+                                                        opt === 'draft'     ? 'bg-yellow-400' :
+                                                        'bg-gray-500'
+                                                    }`}
+                                                />
+                                                {opt === 'all' ? 'All posts' : opt === 'published' ? 'Published' : 'Drafts'}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Count badge */}
+                            <span className="text-[10px] font-semibold text-gray-600 tabular-nums">
+                                {allVideos.filter(v =>
+                                    statusFilter === 'all' ||
+                                    (statusFilter === 'published' && (v as any).status === 'published') ||
+                                    (statusFilter === 'draft' && ((v as any).status === 'draft' || !(v as any).status))
+                                ).length} videos
+                            </span>
                         </div>
 
-                        <div className="flex flex-col gap-3">
-                            {allVideos.map((video) => (
-                                <div
-                                    key={video.id}
-                                    className="bg-[#1a1a1a] border border-white/5 hover:border-white/10 rounded-xl px-4 py-4 transition-colors"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-9 h-9 bg-white/5 rounded-lg flex items-center justify-center shrink-0">
-                                            <FileVideo size={16} className="text-gray-500" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm text-white font-medium truncate">
-                                                {video.file_url.split('/').pop() ?? video.file_url}
-                                            </p>
-                                            <p className="text-[10px] text-gray-600 mt-0.5">
-                                                {video.file_type} · {new Date(video.created_at).toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                        <button
-                                            disabled={!video.file_url}
-                                            onClick={() => handleDownloadVideo(video.file_url)}
-                                            className="shrink-0 flex items-center gap-1.5 text-xs text-gray-400 hover:text-white border border-white/8 hover:border-white/20 px-3 py-1.5 rounded-lg transition-all"
+                        {/* Video list */}
+                        <div className="flex flex-col gap-2">
+                            {allVideos
+                                .filter(v =>
+                                    statusFilter === 'all' ||
+                                    (statusFilter === 'published' && (v as any).status === 'published') ||
+                                    (statusFilter === 'draft' && ((v as any).status === 'draft' || !(v as any).status))
+                                )
+                                .map(video => {
+                                    const isSelected = selectedVideo?.id === video.id;
+                                    const status = (video as any).status as string | undefined;
+                                    const thumb = video.thumbnails?.[0];
+                                    const title = (video as any).title as string | undefined;
+                                    const description = (video as any).description as string | undefined;
+                                    const masterUrl = (video as any).master_cdn_url as string | undefined;
+                                    const playbackUrl = masterUrl || video.file_url;
+
+                                    return (
+                                        <div key={video.id}
+                                            className={`rounded-xl border transition-all duration-200 overflow-hidden ${
+                                                isSelected
+                                                    ? 'border-white/15 bg-[#1c1c1c]'
+                                                    : 'border-white/5 bg-[#181818] hover:border-white/10 hover:bg-[#1a1a1a]'
+                                            }`}
                                         >
-                                            <Download size={12} /> Download
-                                        </button>
-                                        {
-                                            !video.transcode_status &&
+                                            {/* ── Collapsed row ── */}
                                             <button
-                                                disabled={!video.file_url}
-                                                // onClick={() => handleTranscodeVideo(video.id, video.file_url)}
-                                                className="shrink-0 flex items-center gap-1.5 text-xs text-gray-400 hover:text-white border border-white/8 hover:border-white/20 px-3 py-1.5 rounded-lg transition-all"
+                                                className="w-full flex items-center gap-3 px-4 py-3 text-left"
+                                                onClick={() => setSelectedVideo(isSelected ? null : video)}
                                             >
-                                                Transcode
-                                            </button>
-                                        }
-                                    </div>
-
-                                    <div className="mt-3">
-                                        <TranscodeStatus v_id={Number(video.id)} />
-                                    </div>
-
-                                    {video.thumbnails?.length > 0 && (
-                                        <div className="mt-3 grid grid-cols-4 gap-2">
-                                            {video.thumbnails.slice(0, 4).map((thumb, i) => (
-                                                <div key={i} className="aspect-video rounded-lg overflow-hidden bg-black/40">
-                                                    <img src={thumb} alt={`Thumbnail ${i + 1}`} className="w-full h-full object-cover" />
+                                                {/* Thumbnail */}
+                                                <div className="w-16 aspect-video rounded-lg overflow-hidden bg-black/40 shrink-0 border border-white/5">
+                                                    {thumb
+                                                        ? <img src={thumb} alt="thumb" className="w-full h-full object-cover" />
+                                                        : <div className="w-full h-full flex items-center justify-center"><FileVideo size={14} className="text-gray-700" /></div>
+                                                    }
                                                 </div>
-                                            ))}
+
+                                                {/* Meta */}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-white truncate leading-tight">
+                                                        {title || video.file_url.split('/').pop() || 'Untitled'}
+                                                    </p>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        {/* Status badge */}
+                                                        <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${
+                                                            status === 'published'
+                                                                ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                                                                : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+                                                        }`}>
+                                                            <span className={`w-1 h-1 rounded-full ${
+                                                                status === 'published' ? 'bg-green-400' : 'bg-yellow-400'
+                                                            }`} />
+                                                            {status === 'published' ? 'Published' : 'Draft'}
+                                                        </span>
+                                                        <span className="text-gray-600 text-[10px]">
+                                                            {new Date(video.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Expand chevron */}
+                                                <ChevronRight
+                                                    size={14}
+                                                    className={`text-gray-600 shrink-0 transition-transform duration-200 ${
+                                                        isSelected ? 'rotate-90 text-gray-400' : ''
+                                                    }`}
+                                                />
+                                            </button>
+
+                                            {/* ── Expanded detail view ── */}
+                                            {isSelected && (
+                                                <div
+                                                    className="border-t border-white/5 p-4 flex flex-col gap-5"
+                                                    style={{
+                                                        animation: 'expandDown 0.22s cubic-bezier(.22,1,.36,1)',
+                                                    }}
+                                                >
+                                                    {/* Video player */}
+                                                    <div className="w-full rounded-xl overflow-hidden bg-black" style={{ aspectRatio: '16/9' }}>
+                                                        <CustomVideoPlayer src={playbackUrl} autoPlay={false} />
+                                                    </div>
+
+                                                    {/* Title */}
+                                                    {title && (
+                                                        <div>
+                                                            <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-600 mb-1">Title</p>
+                                                            <p className="text-sm font-bold text-white leading-snug">{title}</p>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Description */}
+                                                    {description && (
+                                                        <div>
+                                                            <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-600 mb-1">Description</p>
+                                                            <p className="text-xs text-gray-300 leading-relaxed">{description}</p>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Tags */}
+                                                    {(video as any).tags?.length > 0 && (
+                                                        <div>
+                                                            <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-600 mb-1.5">Tags</p>
+                                                            <div className="flex flex-wrap gap-1.5">
+                                                                {((video as any).tags as string[]).map(t => (
+                                                                    <span key={t} className="bg-white/5 border border-white/8 text-gray-400 text-[10px] px-2 py-0.5 rounded-full">#{t}</span>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Actions row */}
+                                                    <div className="flex items-center gap-2 pt-1">
+                                                        <button
+                                                            onClick={() => handleDownloadVideo(video.file_url)}
+                                                            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white border border-white/8 hover:border-white/20 px-3 py-1.5 rounded-lg transition-all"
+                                                        >
+                                                            <Download size={12} /> Download
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setSelectedVideo(null)}
+                                                            className="ml-auto text-xs text-gray-600 hover:text-gray-300 transition-colors"
+                                                        >
+                                                            Collapse
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                            ))}
+                                    );
+                                })
+                            }
                         </div>
                     </div>
                 )}
