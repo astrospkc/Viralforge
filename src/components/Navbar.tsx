@@ -47,7 +47,7 @@ const Navbar = () => {
                 </Link>
 
                 <div>
-                    {!isAuthenticated && location.pathname === '/' ? (
+                    {!isAuthenticated ? (
                         <Link to="/signin" className="bg-[#E50914] text-white px-4 py-1.5 rounded-sm font-medium hover:bg-[#c11119] transition text-sm">
                             Sign In
                         </Link>

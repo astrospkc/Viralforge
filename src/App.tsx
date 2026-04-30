@@ -20,9 +20,10 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/browse" element={<MainPage />} />
+
         {isAuthenticated ?
           <>
-            <Route path="/browse" element={<MainPage />} />
             <Route path="/transcode" element={<TranscodingPage />} />
           </>
           :

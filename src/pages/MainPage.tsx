@@ -31,7 +31,7 @@ const CATEGORIES = [
 type CategoryId = typeof CATEGORIES[number]['id'];
 
 const MainPage = () => {
-    const { user } = useAuthStore();
+    const { user, isAuthenticated } = useAuthStore();
     const currentUserName = user?.name ?? 'You';
 
     const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -87,7 +87,7 @@ const MainPage = () => {
                             <h1 className="text-lg font-black text-white tracking-tight">Discover</h1>
                             <p className="text-gray-500 text-xs">Proof-based videos from creators worldwide</p>
                         </div>
-                        <Link to="/transcode">
+                        <Link to={isAuthenticated ? "/transcode" : "/signin"}>
                             <button
                                 // onClick={() => setIsUploadOpen(true)}
                                 className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-4 py-2 rounded-xl transition-all hover:scale-105 hover:shadow-lg hover:shadow-red-900/40"
@@ -182,7 +182,7 @@ const MainPage = () => {
                                 Upload videos of your products, services, case studies, or walkthroughs. Let your work speak for itself.
                             </p>
                         </div>
-                        <Link to="/transcode">
+                        <Link to={isAuthenticated ? "/transcode" : "/signin"}>
                             <button
                                 // onClick={() => setIsUploadOpen(true)}
                                 className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all hover:scale-105 hover:shadow-xl hover:shadow-red-900/40 shrink-0"
