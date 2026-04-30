@@ -1,8 +1,8 @@
 import { Bookmark, CheckCircle, Heart, MessageCircle, MoreHorizontal, Play, Share2 } from "lucide-react";
 import ReviewThread from "./ReviewThread";
-import { CommentService } from "../services/comment_service";
+//import { CommentService } from "../services/comment_service";
 import { useAuthStore } from "../store/auth_store";
-import { useQuery } from "@tanstack/react-query";
+//import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import type { VideoPost } from "../../types";
 import VideoModal from "./VideoModal";
@@ -20,13 +20,14 @@ const VideoPostCard = ({ post, currentUserName }: { post: VideoPost; currentUser
     const toggleLike = () => { setLiked(p => !p); setLikes(p => liked ? p - 1 : p + 1); };
     const fmtLikes = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
 
-    const video_id = post.id
-    const { data: comments } = useQuery({
-        queryKey: ["comments", video_id],
-        queryFn: () => CommentService.getTopLevelComments(video_id, token)
-    })
+    // const video_id = post.id
+    // const { data: comments } = useQuery({
+    //     queryKey: ["comments", video_id],
+    //     queryFn: () => CommentService.getTopLevelComments(video_id, token)
+    // })
 
-    console.log("video post details: ", post)
+
+    // console.log("video post details: ", post)
 
 
 
@@ -37,7 +38,8 @@ const VideoPostCard = ({ post, currentUserName }: { post: VideoPost; currentUser
                 <img src={post.userAvatar} alt={post.userName} className="w-9 h-9 rounded-full border border-white/10" />
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-bold text-white truncate">{post.userName}</span>
+
+                        <span className="text-sm font-bold text-white truncate">{currentUserName}</span>
                         {post.userVerified && <CheckCircle size={13} className="text-red-400 fill-red-400 shrink-0" />}
                     </div>
                     <div className="flex items-center gap-1.5 text-gray-500 text-xs">

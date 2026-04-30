@@ -8,7 +8,7 @@ export default function GlobalUploadProgress() {
         uploadPhase,
         progress,
         isVisible,
-        setProgress,
+        // setProgress,
         reset,
     } = useUploadStore();
 

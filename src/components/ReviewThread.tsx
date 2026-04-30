@@ -11,7 +11,7 @@ import type { Comment } from "../../types";
 const ReviewThread = ({ videoId: videoId, token }:
     { videoId: number; token: string }) => {
     const [open, setOpen] = useState(false);
-    const [helpful, setHelpful] = useState<Record<number, boolean>>({});
+    // const [helpful, setHelpful] = useState<Record<number, boolean>>({});
     const [newRating, setNewRating] = useState(0);
     const [newComment, setNewComment] = useState<string | undefined>();
     const commentRef = useRef<HTMLTextAreaElement>(null);
@@ -118,7 +118,7 @@ const ReviewThread = ({ videoId: videoId, token }:
                                     // onClick={() => toggleHelpful(r.id)}
                                     className="flex items-center gap-1 group"
                                 >
-                                    <ThumbsUp size={12} className={helpful[r?.id] ? 'text-blue-400 fill-blue-400' : 'text-gray-600 group-hover:text-blue-400 transition-colors'} />
+                                    <ThumbsUp size={12} className={'text-blue-400 fill-blue-400'} />
                                     {/* <span className={`text-[10px] transition-colors ${helpful[r.id] ? 'text-blue-400' : 'text-gray-600'}`}>
                                         {r.helpful} helpful
                                     </span> */}

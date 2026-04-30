@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import {
     Upload, FileVideo, Scissors, Download,
-    RefreshCw, X, ChevronRight, Zap, Clock,
+    RefreshCw, X, ChevronRight, Zap,
     Film, Clapperboard, Tag, Check, Image as ImageIcon,
     Play, Pause, AlertCircle
 } from 'lucide-react';
@@ -987,18 +987,16 @@ const TranscodingPage = () => {
                                     className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/8 border border-white/8 hover:border-white/15 rounded-lg text-xs text-gray-300 font-semibold transition-all"
                                 >
                                     <span
-                                        className={`w-1.5 h-1.5 rounded-full ${
-                                            statusFilter === 'published' ? 'bg-green-400' :
-                                            statusFilter === 'draft'     ? 'bg-yellow-400' :
-                                            'bg-gray-500'
-                                        }`}
+                                        className={`w-1.5 h-1.5 rounded-full ${statusFilter === 'published' ? 'bg-green-400' :
+                                            statusFilter === 'draft' ? 'bg-yellow-400' :
+                                                'bg-gray-500'
+                                            }`}
                                     />
                                     {statusFilter === 'all' ? 'All posts' : statusFilter === 'published' ? 'Published' : 'Drafts'}
                                     <ChevronRight
                                         size={12}
-                                        className={`text-gray-500 transition-transform duration-200 ${
-                                            filterDropdownOpen ? 'rotate-90' : ''
-                                        }`}
+                                        className={`text-gray-500 transition-transform duration-200 ${filterDropdownOpen ? 'rotate-90' : ''
+                                            }`}
                                     />
                                 </button>
                                 {filterDropdownOpen && (
@@ -1010,18 +1008,16 @@ const TranscodingPage = () => {
                                             <button
                                                 key={opt}
                                                 onClick={() => { setStatusFilter(opt); setFilterDropdownOpen(false); setSelectedVideo(null); }}
-                                                className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold transition-colors ${
-                                                    statusFilter === opt
-                                                        ? 'text-white bg-white/8'
-                                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                                }`}
+                                                className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-semibold transition-colors ${statusFilter === opt
+                                                    ? 'text-white bg-white/8'
+                                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                                    }`}
                                             >
                                                 <span
-                                                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                                                        opt === 'published' ? 'bg-green-400' :
-                                                        opt === 'draft'     ? 'bg-yellow-400' :
-                                                        'bg-gray-500'
-                                                    }`}
+                                                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${opt === 'published' ? 'bg-green-400' :
+                                                        opt === 'draft' ? 'bg-yellow-400' :
+                                                            'bg-gray-500'
+                                                        }`}
                                                 />
                                                 {opt === 'all' ? 'All posts' : opt === 'published' ? 'Published' : 'Drafts'}
                                             </button>
@@ -1059,11 +1055,10 @@ const TranscodingPage = () => {
 
                                     return (
                                         <div key={video.id}
-                                            className={`rounded-xl border transition-all duration-200 overflow-hidden ${
-                                                isSelected
-                                                    ? 'border-white/15 bg-[#1c1c1c]'
-                                                    : 'border-white/5 bg-[#181818] hover:border-white/10 hover:bg-[#1a1a1a]'
-                                            }`}
+                                            className={`rounded-xl border transition-all duration-200 overflow-hidden ${isSelected
+                                                ? 'border-white/15 bg-[#1c1c1c]'
+                                                : 'border-white/5 bg-[#181818] hover:border-white/10 hover:bg-[#1a1a1a]'
+                                                }`}
                                         >
                                             {/* ── Collapsed row ── */}
                                             <button
@@ -1085,14 +1080,12 @@ const TranscodingPage = () => {
                                                     </p>
                                                     <div className="flex items-center gap-2 mt-0.5">
                                                         {/* Status badge */}
-                                                        <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${
-                                                            status === 'published'
-                                                                ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                                                                : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
-                                                        }`}>
-                                                            <span className={`w-1 h-1 rounded-full ${
-                                                                status === 'published' ? 'bg-green-400' : 'bg-yellow-400'
-                                                            }`} />
+                                                        <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${status === 'published'
+                                                            ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                                                            : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+                                                            }`}>
+                                                            <span className={`w-1 h-1 rounded-full ${status === 'published' ? 'bg-green-400' : 'bg-yellow-400'
+                                                                }`} />
                                                             {status === 'published' ? 'Published' : 'Draft'}
                                                         </span>
                                                         <span className="text-gray-600 text-[10px]">
@@ -1104,9 +1097,8 @@ const TranscodingPage = () => {
                                                 {/* Expand chevron */}
                                                 <ChevronRight
                                                     size={14}
-                                                    className={`text-gray-600 shrink-0 transition-transform duration-200 ${
-                                                        isSelected ? 'rotate-90 text-gray-400' : ''
-                                                    }`}
+                                                    className={`text-gray-600 shrink-0 transition-transform duration-200 ${isSelected ? 'rotate-90 text-gray-400' : ''
+                                                        }`}
                                                 />
                                             </button>
 

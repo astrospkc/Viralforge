@@ -2,6 +2,11 @@ import axios from "axios";
 import baseUrl from "./api_service";
 import type { VideoPost } from "../../types";
 
+export type FeedsPage = {
+    data: VideoPost[];
+    nextCursor: string | null;
+}
+
 
 export type GetPresignedUrlResponse = {
     Message: string,
@@ -289,7 +294,7 @@ export const VideoService = {
     // get all feeds
     // get your library 
 
-    async GetAllFeeds(cursor: string, limit: number, token: string): Promise<VideoPost[] | null> {
+    async GetAllFeeds(cursor: string, limit: number, token: string): Promise<FeedsPage | null> {
         try {
             const config = {
                 headers: {
@@ -304,7 +309,10 @@ export const VideoService = {
             );
             console.log("get all feeds response :", response.data)
 
-            return response.data.data
+            return {
+                data: response.data.data ?? [],
+                nextCursor: response.data.nextCursor ?? null,
+            };
         } catch (error) {
             console.error("error in getting all feeds: ", error)
             return null;

@@ -58,9 +58,9 @@ const pipeline = [
 ];
 
 /* ─── Smooth section divider component ─── */
-const SectionDivider = ({ from, to }: { from: string; to: string }) => (
-    <div className="h-24 w-full" style={{ background: `linear-gradient(to bottom, ${from}, ${to})` }} />
-);
+// const SectionDivider = ({ from, to }: { from: string; to: string }) => (
+//     <div className="h-24 w-full" style={{ background: `linear-gradient(to bottom, ${from}, ${to})` }} />
+// );
 
 const LandingPage = () => {
     const [activeStep, setActiveStep] = useState(0);

@@ -1,10 +1,10 @@
-import type { Comments } from "../../types";
+import type { Comment } from "../../types";
 
 
-export type CommentNode = Comments & {
+export type CommentNode = Comment & {
     children: CommentNode[];
 }
-export function buildCommentTree(comments: Comments[]): CommentNode[] {
+export function buildCommentTree(comments: Comment[]): CommentNode[] {
     const map = new Map<number, CommentNode>();
     const roots: CommentNode[] = [];
     // Step 1: index every comment with an empty children array

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Navbar from '../components/Navbar';
 import UploadModal from '../components/UploadModal';
 import { useAuthStore } from '../store/auth_store';
-import type { VideoPost } from '../../types';
+import type { FeedsPage } from '../services/video_service';
 import {
     Upload, X, Search,
     Flame, Clock, Layers, ShoppingBag, Code2,
@@ -36,28 +36,24 @@ const MainPage = () => {
 
     const [isUploadOpen, setIsUploadOpen] = useState(false);
     const [activeCategory, setActiveCategory] = useState<CategoryId>('all');
-    const [feeds, setFeeds] = useState<VideoPost[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const { token } = useAuthStore()
 
 
 
-    const fetchFeeds = async ({ pageParam = "" }) => {
-        try {
-            const response = await VideoService.GetAllFeeds(pageParam, 10, token);
-            if (response) {
-                setFeeds(response);
-            }
-        } catch (error) {
-            console.error("error in getting all posts: ", error)
-        }
+    const fetchFeeds = async ({ pageParam = "" }): Promise<FeedsPage> => {
+        const response = await VideoService.GetAllFeeds(pageParam, 10, token);
+        return response ?? { data: [], nextCursor: null };
     }
 
-    const { data: feedsData, fetchNextPage, hasNextPage } = useInfiniteQuery({
+    const { data: feedsData } = useInfiniteQuery({
         queryKey: ["feeds"],
         queryFn: fetchFeeds,
-        getNextPageParam: (lastPage) => lastPage?.nextCursor,
+        // initialPageParam: "",
+        getNextPageParam: (lastPage) => lastPage?.nextCursor ?? undefined,
     })
+
+    const feeds = feedsData?.pages.flatMap(page => page.data) ?? [];
 
     console.log("feedsData: ", feedsData)
     console.log('feeds: ', feeds)
