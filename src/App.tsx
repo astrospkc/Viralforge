@@ -4,6 +4,8 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import MainPage from './pages/MainPage';
 import TranscodingPage from './pages/TranscodingPage';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import { Toaster } from 'react-hot-toast';
 import { useAuthStore } from './store/auth_store';
 import PageNotFound from './pages/PageNotFound';
@@ -21,6 +23,8 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/browse" element={<MainPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {isAuthenticated ?
           <>
