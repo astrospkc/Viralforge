@@ -27,9 +27,9 @@ type AuthResponse = {
     Success: boolean
 }
 
-type ForgotPasswordData = {
-    Email: string;
-}
+// type ForgotPasswordData = {
+//     Email: string;
+// }
 
 type ResetPasswordData = {
     Email: string;
