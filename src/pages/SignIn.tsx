@@ -65,7 +65,7 @@ const SignIn = () => {
                         <input
                             id="signin-email"
                             type="email"
-                            placeholder="Email or mobile number"
+                            placeholder="Email"
                             value={formData.Email}
                             name="Email"
                             onChange={handleChange}
