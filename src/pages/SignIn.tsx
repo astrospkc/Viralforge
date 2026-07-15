@@ -148,9 +148,7 @@ const SignIn = () => {
                     <div className="mt-10 text-gray-400">
                         New to VIRAL_FORGE? <Link to="/signup" className="text-white hover:underline">Sign up now</Link>.
                     </div>
-                    <div className="mt-4 text-xs text-gray-500">
-                        This page is protected by Google reCAPTCHA to ensure you're not a bot.
-                    </div>
+                    
                 </div>
             </div>
         </div>
