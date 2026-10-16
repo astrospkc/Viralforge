@@ -1,0 +1,31 @@
+{
+  "name": "@viralforge/mobile",
+  "packageManager": "pnpm@11.5.0",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.25.0",
+    "@expo/metro-runtime": "~4.0.1",
+    "@viralforge/shared": "workspace:*",
+    "expo": "~52.0.37",
+    "expo-status-bar": "~2.0.1",
+    "react": "18.3.1",
+    "react-native": "0.76.7",
+    "react-native-web": "~0.19.13"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.0",
+    "@expo/metro-config": "~0.19.11",
+    "@types/react": "~18.3.12",
+    "babel-preset-expo": "~12.0.9",
+    "typescript": "~5.9.3"
+  }
+}
