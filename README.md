@@ -58,6 +58,89 @@ This is a relatively simple application. Here's a quick overview of how the majo
 ## 🧩 Who Is This For?
 
 - **Freelancers & Agencies** — Show real client work and project results instead of just listing services.
+- **Developers & Creators** — Showcase full-stack apps, demos, and case studies with verified video proof.
+- **Businesses** — Showcase actual products, live demos, and customer transformations.
+
+---
+
+## 🏗️ Frontend Monorepo Structure
+
+This repository is structured as a pnpm-powered frontend monorepo:
+
+```
+viralForge/
+├── apps/
+│   ├── web/                     # Web App (React 19 + Vite + Tailwind CSS)
+│   │   ├── src/                 # Pages, components, services, and state
+│   │   ├── vite.config.ts       # Vite build configuration
+│   │   └── package.json         # @viralforge/web
+│   │
+│   └── mobile/                  # Android / Mobile App (React Native + Expo SDK 52)
+│       ├── src/                 # Screens (Feed, Video Player, Transcoding, Auth)
+│       ├── app.json             # Expo configuration (configured for Android: com.viralforge.app)
+│       ├── metro.config.js      # Monorepo-aware Metro bundler config
+│       └── package.json         # @viralforge/mobile
+│
+├── packages/
+│   └── shared/                  # Shared TypeScript types & data models
+│       ├── src/                 # Types: User, VideoPost, Comment, AuthState, etc.
+│       └── package.json         # @viralforge/shared
+│
+├── pnpm-workspace.yaml          # Workspace definitions
+├── .npmrc                       # Hoisting config for React Native / Expo
+└── package.json                 # Monorepo root orchestration scripts
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18+)
+- [pnpm](https://pnpm.io/) (`corepack enable` or `npm i -g pnpm`)
+- For Mobile/Android: [Expo Go app](https://expo.dev/go) or Android Studio / SDK
+
+### Installation
+
+Install dependencies across all workspaces:
+
+```bash
+pnpm install
+```
+
+### Running Applications
+
+#### 🌐 Web Application (Vite + React)
+
+```bash
+# Start development server
+pnpm dev:web
+
+# Build for production
+pnpm build:web
+```
+
+#### 📱 Android App (React Native + Expo)
+
+```bash
+# Start Expo development server (interactive QR code & dev tools)
+pnpm dev:mobile
+
+# Launch directly on connected Android device / emulator
+pnpm android
+```
+
+#### 📦 Shared Types & Packages
+
+```bash
+# Typecheck shared package
+pnpm --filter @viralforge/shared typecheck
+
+# Typecheck mobile app
+pnpm --filter @viralforge/mobile typecheck
+```
+
 - **Small Businesses** — Let potential customers see your product or service in action before reaching out.
 - **Service Buyers** — Discover and evaluate providers through actual video proof, not just text descriptions.
 

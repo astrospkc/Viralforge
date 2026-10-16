@@ -7,13 +7,29 @@ import toast from 'react-hot-toast';
 
 const SignUp = () => {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({ Name: "", Email: "", Password: "" })
+    const [formData, setFormData] = useState({ Name: "", Email: "", Password: "", OTP:"" })
     const { setToken, setIsAuthenticated } = useAuthStore();
+    const [ otpSent, setOtpSent ] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     }
+
+    const handleSendOTPToEmail = async(email:string)=>{
+            try {
+                const response = await AuthService.SendRegisterOTPinEmail(email);
+                if(response?.Success){
+                    toast.success("OTP sent to your email, please check your inbox");
+                    setOtpSent(true);
+                }
+            }catch (error) {
+                console.error("failed to send otp, internal error occurred", error)
+                throw new Error("internal error occurred while sending otp");
+            }
+
+    }
+    
     const handleSignUp = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
@@ -41,7 +57,7 @@ const SignUp = () => {
 
 
     return (
-        <div className="relative min-h-screen w-full bg-white md:bg-transparent text-black md:text-white">
+        <div className="relative min-h-screen w-full bg-black md:bg-transparent text-white">
             <Navbar />
             {/* Background Image (Hidden on mobile) */}
             <div className="absolute inset-0 z-0 hidden md:block">
@@ -53,15 +69,15 @@ const SignUp = () => {
                 <div className="absolute inset-0 bg-black/50"></div>
             </div>
 
-            <div className="relative z-10 flex min-h-screen items-center justify-center p-4">
-                <div className="bg-white md:bg-black/80 p-8 md:p-16 rounded-lg w-full max-w-md">
-                    <h1 className="text-3xl font-bold mb-4 md:mb-8 text-[#333] md:text-white">Sign Up</h1>
-                    <p className="mb-6 md:text-gray-300">Just a few more steps and you're done! We hate paperwork, too.</p>
+            <div className="relative z-10 flex min-h-screen items-center justify-center p-4 ">
+                <div className="bg-black/80 p-8 md:p-16 rounded-lg w-full max-w-md border-2 border-white/20">
+                    <h1 className="text-3xl font-bold mb-4 md:mb-8 text-white">Sign Up</h1>
+                    <p className="mb-6 text-white">Just a few more steps and you're done!</p>
                     <form onSubmit={handleSignUp} className="flex flex-col gap-4">
                         <input
                             type="text"
                             placeholder="Name"
-                            className="p-4 border border-gray-400 rounded md:bg-[#333] placeholder-gray-500 md:placeholder-gray-400 text-black md:text-white focus:outline-none focus:ring-1 focus:ring-[#E50914]"
+                            className="p-4 border border-gray-400 rounded md:bg-[#333] placeholder-gray-500 md:placeholder-gray-400 text-white focus:outline-none focus:ring-1 focus:ring-[#E50914]"
                             required
                             name='Name'
                             value={formData.Name}
@@ -70,7 +86,7 @@ const SignUp = () => {
                         <input
                             type="email"
                             placeholder="Email address"
-                            className="p-4 border border-gray-400 rounded md:bg-[#333] placeholder-gray-500 md:placeholder-gray-400 text-black md:text-white focus:outline-none focus:ring-1 focus:ring-[#E50914]"
+                            className="p-4 border border-gray-400 rounded md:bg-[#333] placeholder-gray-500 md:placeholder-gray-400 text-white focus:outline-none focus:ring-1 focus:ring-[#E50914]"
                             required
                             name='Email'
                             value={formData.Email}
@@ -79,15 +95,35 @@ const SignUp = () => {
                         <input
                             type="password"
                             placeholder="Add a password"
-                            className="p-4 border border-gray-400 rounded md:bg-[#333] placeholder-gray-500 md:placeholder-gray-400 text-black md:text-white focus:outline-none focus:ring-1 focus:ring-[#E50914]"
+                            className="p-4 border border-gray-400 rounded md:bg-[#333] placeholder-gray-500 md:placeholder-gray-400 text-white focus:outline-none focus:ring-1 focus:ring-[#E50914]"
                             required
                             name='Password'
                             value={formData.Password}
                             onChange={(e) => handleChange(e)}
                         />
-                        <button type="submit" className="bg-[#E50914] text-white font-bold py-3 pt-3.5 rounded mt-4 hover:bg-[#c11119] transition">
-                            Next
+                        {
+                            !otpSent && <button type="button" onClick={() => handleSendOTPToEmail(formData.Email)} className="bg-[#E50914] text-white font-bold py-3 pt-3.5 rounded mt-4 hover:bg-[#c11119] transition">
+                            Send OTP
                         </button>
+                        }
+                        {
+                            otpSent && 
+                            <> <input
+                            type="text"
+                            placeholder="Enter OTP"
+                            className="p-4 border border-gray-400 rounded md:bg-[#333] placeholder-gray-500 md:placeholder-gray-400 text-white focus:outline-none focus:ring-1 focus:ring-[#E50914]"
+                            required
+                            name='OTP'
+                            value={formData.OTP}
+                            onChange={(e) => handleChange(e)}
+                        />  
+                         <button type="submit" className="bg-[#E50914] text-white font-bold py-3 pt-3.5 rounded mt-4 hover:bg-[#c11119] transition">
+                            Sign Up
+                        </button> </>
+                        }
+
+                        
+                       
                     </form>
 
                     {/* OR divider */}
@@ -114,8 +150,8 @@ const SignUp = () => {
                         Continue with Google
                     </button>
 
-                    <div className="mt-6 md:text-gray-400">
-                        Already have an account? <Link to="/signin" className="md:text-white font-medium hover:underline">Sign In</Link>.
+                    <div className="mt-6 text-gray-400">
+                        Already have an account? <Link to="/signin" className="md:text-white font-medium underline">Sign In</Link>.
                     </div>
                 </div>
             </div>

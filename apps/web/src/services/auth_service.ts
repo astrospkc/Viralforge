@@ -139,5 +139,36 @@ export const AuthService = {
             throw new Error("An unexpected error occurred.");
         }
     },
+    async VerifyOTP(email:string , code:string){
+        try {
+            const response = await axios.post(`${baseUrl}/auth/v1/verify_otp`, {
+                "Email": email,
+                "OTP": code
+            });
+            return response.data;
+        } catch (error: any) {
+            if (axios.isAxiosError(error) && error.response) {
+                toast.error(error.response.data?.Message ?? "Failed to verify OTP.");
+                throw new Error(error.response.data?.Message);
+            }
+            toast.error("An unexpected error occurred. Please try again.");
+            throw new Error("An unexpected error occurred.");
+        }
+    },
+    async SendRegisterOTPinEmail(email:string): Promise<{ Success: boolean; Message: string } | null>{
+        try {
+            const response = await axios.post(`${baseUrl}/auth/v1/send_email_otp`,{
+                "Email": email
+            })
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error) && error.response) {
+                toast.error(error.response.data?.Message ?? "Failed to send registration OTP.");
+                throw new Error(error.response.data?.Message);
+            }
+            toast.error("An unexpected error occurred. Please try again.");
+            throw new Error("An unexpected error occurred.");
+        }
+    }
 
 }
