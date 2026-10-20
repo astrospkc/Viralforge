@@ -5,42 +5,50 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 
 interface TranscodeJob {
   id: string;
   videoTitle: string;
+  productName: string;
   status: 'processing' | 'completed' | 'queued';
   progress: number;
   qualities: { resolution: string; status: 'done' | 'processing' | 'pending' }[];
   timeRemaining: string;
 }
 
-export const TranscodeStatusScreen: React.FC = () => {
+interface TranscodeStatusScreenProps {
+  onNewUpload?: () => void;
+}
+
+export const TranscodeStatusScreen: React.FC<TranscodeStatusScreenProps> = ({ onNewUpload }) => {
   const [jobs] = useState<TranscodeJob[]>([
     {
       id: 'job-9821',
-      videoTitle: 'Microservices & HLS Pipeline Demo.mp4',
+      productName: 'ATH-M50x Professional Studio Monitor',
+      videoTitle: 'Raw Acoustic Frequency & Build Test.mp4',
       status: 'processing',
       progress: 74,
       qualities: [
-        { resolution: '1080p (FHD)', status: 'done' },
-        { resolution: '720p (HD)', status: 'done' },
-        { resolution: '480p (SD)', status: 'processing' },
-        { resolution: 'HLS Master Playlist', status: 'pending' },
+        { resolution: '1080p (FHD 60fps)', status: 'done' },
+        { resolution: '720p (HD 30fps)', status: 'done' },
+        { resolution: '480p (SD Adaptive)', status: 'processing' },
+        { resolution: 'HLS Master Playlist (master.m3u8)', status: 'pending' },
       ],
-      timeRemaining: '~18s remaining',
+      timeRemaining: '~14s remaining',
     },
     {
       id: 'job-9820',
-      videoTitle: 'Next-Gen Video Player Showcase.mp4',
+      productName: 'CNC Aluminum Mechanical Keyboard',
+      videoTitle: 'Typing Sound Test & Gasket Flex.mp4',
       status: 'completed',
       progress: 100,
       qualities: [
-        { resolution: '1080p (FHD)', status: 'done' },
-        { resolution: '720p (HD)', status: 'done' },
-        { resolution: '480p (SD)', status: 'done' },
-        { resolution: 'HLS Master Playlist', status: 'done' },
+        { resolution: '1080p (FHD 60fps)', status: 'done' },
+        { resolution: '720p (HD 30fps)', status: 'done' },
+        { resolution: '480p (SD Adaptive)', status: 'done' },
+        { resolution: 'HLS Master Playlist (master.m3u8)', status: 'done' },
       ],
       timeRemaining: 'Complete',
     },
@@ -49,9 +57,10 @@ export const TranscodeStatusScreen: React.FC = () => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <Text style={styles.title}>Transcoding Pipeline</Text>
+        <Text style={styles.eyebrow}>MERCHANT PIPELINE</Text>
+        <Text style={styles.title}>HLS Transcoding</Text>
         <Text style={styles.subtitle}>
-          Real-time video transcoding, adaptive bitrate HLS packaging status
+          Adaptive bitrate packaging ensures buyers get smooth video proof on any mobile network speed.
         </Text>
       </View>
 
@@ -60,8 +69,9 @@ export const TranscodeStatusScreen: React.FC = () => {
         return (
           <View key={job.id} style={styles.card}>
             <View style={styles.cardHeader}>
-              <View>
-                <Text style={styles.jobId}>Job ID: {job.id}</Text>
+              <View style={{ flex: 1, marginRight: 8 }}>
+                <Text style={styles.jobId}>JOB ID: {job.id}</Text>
+                <Text style={styles.productName}>{job.productName}</Text>
                 <Text style={styles.videoTitle}>{job.videoTitle}</Text>
               </View>
               <View
@@ -70,7 +80,12 @@ export const TranscodeStatusScreen: React.FC = () => {
                   isProcessing ? styles.statusProcessing : styles.statusCompleted,
                 ]}
               >
-                <Text style={styles.statusBadgeText}>
+                <Text
+                  style={[
+                    styles.statusBadgeText,
+                    isProcessing ? { color: '#D4FF32' } : { color: '#4ADE80' },
+                  ]}
+                >
                   {job.status.toUpperCase()}
                 </Text>
               </View>
@@ -88,14 +103,14 @@ export const TranscodeStatusScreen: React.FC = () => {
                 />
               </View>
               <View style={styles.progressMeta}>
-                <Text style={styles.progressText}>{job.progress}%</Text>
+                <Text style={styles.progressText}>{job.progress}% Encoded</Text>
                 <Text style={styles.remainingText}>{job.timeRemaining}</Text>
               </View>
             </View>
 
-            {/* Resolutions Breakdown */}
+            {/* Renditions Breakdown */}
             <View style={styles.resolutionList}>
-              <Text style={styles.resHeader}>Renditions & HLS Playlists:</Text>
+              <Text style={styles.resHeader}>HLS Renditions & Multi-Bitrate Streams:</Text>
               {job.qualities.map((q) => (
                 <View key={q.resolution} style={styles.resRow}>
                   <Text style={styles.resTitle}>{q.resolution}</Text>
@@ -106,7 +121,11 @@ export const TranscodeStatusScreen: React.FC = () => {
                       q.status === 'processing' && styles.resStatusProc,
                     ]}
                   >
-                    {q.status === 'done' ? '✓ Ready' : q.status === 'processing' ? '⏳ Encoding' : '• Pending'}
+                    {q.status === 'done'
+                      ? '✓ Ready'
+                      : q.status === 'processing'
+                      ? '⏳ Encoding...'
+                      : '• Queued'}
                   </Text>
                 </View>
               ))}
@@ -115,9 +134,11 @@ export const TranscodeStatusScreen: React.FC = () => {
         );
       })}
 
-      <TouchableOpacity style={styles.uploadNewBtn}>
-        <Text style={styles.uploadNewBtnText}>+ Upload New Video for Transcoding</Text>
-      </TouchableOpacity>
+      {onNewUpload && (
+        <TouchableOpacity style={styles.uploadNewBtn} onPress={onNewUpload} activeOpacity={0.85}>
+          <Text style={styles.uploadNewBtnText}>+ Publish Another Video Proof</Text>
+        </TouchableOpacity>
+      )}
     </ScrollView>
   );
 };
@@ -125,7 +146,7 @@ export const TranscodeStatusScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#141414',
+    backgroundColor: '#000000',
   },
   content: {
     padding: 16,
@@ -133,24 +154,33 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 20,
+    paddingHorizontal: 4,
+  },
+  eyebrow: {
+    color: '#D4FF32',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 2,
+    marginBottom: 4,
   },
   title: {
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: '800',
     color: '#FFFFFF',
-    marginBottom: 4,
+    fontFamily: Platform.OS === 'android' ? 'serif' : 'Georgia',
+    marginBottom: 6,
   },
   subtitle: {
     fontSize: 13,
-    color: '#888888',
+    color: '#A1A1AA',
     lineHeight: 18,
   },
   card: {
-    backgroundColor: '#1E1E1E',
-    borderRadius: 10,
-    padding: 16,
+    backgroundColor: '#121212',
+    borderRadius: 18,
+    padding: 18,
     borderWidth: 1,
-    borderColor: '#2E2E2E',
+    borderColor: '#242424',
     marginBottom: 16,
   },
   cardHeader: {
@@ -160,49 +190,58 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   jobId: {
-    color: '#888888',
-    fontSize: 11,
-    fontFamily: 'monospace',
+    color: '#71717A',
+    fontSize: 10,
+    fontFamily: Platform.OS === 'android' ? 'monospace' : 'Courier',
     marginBottom: 2,
+    letterSpacing: 1,
   },
-  videoTitle: {
+  productName: {
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
-    maxWidth: 220,
+    marginBottom: 2,
+  },
+  videoTitle: {
+    color: '#A1A1AA',
+    fontSize: 12,
   },
   statusBadge: {
     paddingVertical: 4,
     paddingHorizontal: 8,
-    borderRadius: 4,
+    borderRadius: 8,
   },
   statusProcessing: {
-    backgroundColor: '#3b2d12',
+    backgroundColor: 'rgba(212, 255, 50, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(212, 255, 50, 0.3)',
   },
   statusCompleted: {
-    backgroundColor: '#13351f',
+    backgroundColor: 'rgba(74, 222, 128, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(74, 222, 128, 0.3)',
   },
   statusBadgeText: {
-    color: '#FBBF24',
     fontSize: 10,
     fontWeight: '800',
+    letterSpacing: 0.5,
   },
   progressContainer: {
     marginBottom: 14,
   },
   progressTrack: {
-    height: 8,
-    backgroundColor: '#2A2A2A',
-    borderRadius: 4,
+    height: 7,
+    backgroundColor: '#222222',
+    borderRadius: 3.5,
     overflow: 'hidden',
     marginBottom: 6,
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#E50914',
+    backgroundColor: '#D4FF32',
   },
   progressBarCompleted: {
-    backgroundColor: '#22C55E',
+    backgroundColor: '#4ADE80',
   },
   progressMeta: {
     flexDirection: 'row',
@@ -214,19 +253,21 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   remainingText: {
-    color: '#888888',
-    fontSize: 12,
+    color: '#71717A',
+    fontSize: 11,
   },
   resolutionList: {
-    backgroundColor: '#161616',
+    backgroundColor: '#181818',
     padding: 12,
-    borderRadius: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#222222',
     gap: 8,
   },
   resHeader: {
-    color: '#AAAAAA',
-    fontSize: 11,
-    fontWeight: '700',
+    color: '#A1A1AA',
+    fontSize: 10,
+    fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 4,
@@ -236,33 +277,30 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   resTitle: {
-    color: '#DDDDDD',
-    fontSize: 13,
+    color: '#E4E4E7',
+    fontSize: 12,
   },
   resStatus: {
-    color: '#666666',
-    fontSize: 12,
+    color: '#71717A',
+    fontSize: 11,
     fontWeight: '600',
   },
   resStatusDone: {
-    color: '#22C55E',
+    color: '#4ADE80',
   },
   resStatusProc: {
-    color: '#E50914',
+    color: '#D4FF32',
   },
   uploadNewBtn: {
-    backgroundColor: '#262626',
-    borderWidth: 1,
-    borderColor: '#3a3a3a',
+    backgroundColor: '#D4FF32',
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: 'center',
     marginTop: 8,
   },
   uploadNewBtnText: {
-    color: '#FFFFFF',
+    color: '#000000',
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '800',
   },
 });
-

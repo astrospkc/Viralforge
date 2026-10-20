@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Image,
   TextInput,
+  Platform,
+  Alert,
 } from 'react-native';
 import { MobileVideoItem } from '../types';
 
@@ -18,23 +20,24 @@ interface VideoDetailScreenProps {
 export const VideoDetailScreen: React.FC<VideoDetailScreenProps> = ({ video, onClose }) => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [selectedQuality, setSelectedQuality] = useState(
-    video.qualities[0]?.quality || 'Auto'
+    video.qualities[0]?.quality || '1080p'
   );
   const [likes, setLikes] = useState(video.likes);
   const [hasLiked, setHasLiked] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [comments, setComments] = useState([
     {
       id: 1,
       user: 'Marcus Lee',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-      text: 'Great walkthrough overall. Loved the clean architecture and proof of work demonstration.',
+      text: 'The unedited sound test proves the ear-cup seal is legit. Ordered immediately after watching!',
       time: '1h ago',
     },
     {
       id: 2,
       user: 'Priya Nair',
       avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
-      text: 'The HLS streaming performance on this video is silky smooth!',
+      text: 'Love that ViralForge requires real uncut proof instead of fake promotional renders.',
       time: '3h ago',
     },
   ]);
@@ -48,6 +51,13 @@ export const VideoDetailScreen: React.FC<VideoDetailScreenProps> = ({ video, onC
       setLikes(likes + 1);
       setHasLiked(true);
     }
+  };
+
+  const handleBuy = () => {
+    Alert.alert(
+      'Order Initiated',
+      `Redirecting to ${video.shopName || 'Merchant'} checkout for ${video.productName || video.title} (${video.productPrice || '$149.00'}).`
+    );
   };
 
   const handleAddComment = () => {
@@ -69,12 +79,18 @@ export const VideoDetailScreen: React.FC<VideoDetailScreenProps> = ({ video, onC
     <View style={styles.container}>
       {/* Top Bar */}
       <View style={styles.navBar}>
-        <TouchableOpacity style={styles.backButton} onPress={onClose}>
-          <Text style={styles.backButtonText}>← Back to Feed</Text>
+        <TouchableOpacity style={styles.backButton} onPress={onClose} activeOpacity={0.7}>
+          <Text style={styles.backButtonText}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.navTitle} numberOfLines={1}>
-          {video.title}
+          {video.productName || video.title}
         </Text>
+        <TouchableOpacity
+          style={styles.saveHeaderBtn}
+          onPress={() => setIsSaved(!isSaved)}
+        >
+          <Text style={{ fontSize: 16 }}>{isSaved ? '🔖' : '🏷️'}</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -82,15 +98,22 @@ export const VideoDetailScreen: React.FC<VideoDetailScreenProps> = ({ video, onC
         <View style={styles.playerContainer}>
           <Image source={{ uri: video.thumbnail }} style={styles.playerThumbnail} />
           <View style={styles.playerOverlay}>
+            {/* Top Proof Tag */}
+            <View style={styles.videoProofTag}>
+              <Text style={styles.proofCheck}>✓</Text>
+              <Text style={styles.proofTagText}>VERIFIED VIDEO PROOF</Text>
+            </View>
+
             <TouchableOpacity
               style={styles.playButton}
               onPress={() => setIsPlaying(!isPlaying)}
+              activeOpacity={0.8}
             >
               <Text style={styles.playIcon}>{isPlaying ? '❚❚' : '▶'}</Text>
             </TouchableOpacity>
 
             <View style={styles.playerControlsBottom}>
-              <Text style={styles.timeTracker}>03:14 / {video.duration}</Text>
+              <Text style={styles.timeTracker}>01:14 / {video.duration}</Text>
               <View style={styles.qualityPills}>
                 {video.qualities.map((q) => (
                   <TouchableOpacity
@@ -116,68 +139,70 @@ export const VideoDetailScreen: React.FC<VideoDetailScreenProps> = ({ video, onC
           </View>
         </View>
 
-        {/* Video Details */}
-        <View style={styles.detailsContent}>
-          <Text style={styles.videoTitle}>{video.title}</Text>
-          <Text style={styles.statsLine}>
-            {video.views} views • Uploaded {video.time} • Category: {video.category}
-          </Text>
-
-          {/* Action Buttons */}
-          <View style={styles.actionRow}>
-            <TouchableOpacity
-              style={[styles.actionBtn, hasLiked && styles.actionBtnActive]}
-              onPress={handleLike}
-            >
-              <Text style={styles.actionBtnText}>
-                {hasLiked ? '❤️ Liked' : '🤍 Like'} ({likes})
+        {/* Product & Merchant Purchase Box */}
+        <View style={styles.purchaseBox}>
+          <View style={styles.productHeaderRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.productTitle}>
+                {video.productName || video.title}
               </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionBtn}>
-              <Text style={styles.actionBtnText}>🔗 Share</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionBtn}>
-              <Text style={styles.actionBtnText}>📥 Save</Text>
-            </TouchableOpacity>
+              <Text style={styles.merchantSub}>
+                Sold by <Text style={{ color: '#FFFFFF', fontWeight: '700' }}>{video.shopName || video.userName}</Text> • In Stock
+              </Text>
+            </View>
+            <Text style={styles.priceTag}>{video.productPrice || '$149.00'}</Text>
           </View>
 
-          {/* Creator Info */}
+          <View style={styles.buyActionRow}>
+            <TouchableOpacity style={styles.buyButton} onPress={handleBuy} activeOpacity={0.88}>
+              <Text style={styles.buyButtonText}>🛍️ Buy Verified Product</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.likeButton, hasLiked && styles.likeButtonActive]}
+              onPress={handleLike}
+            >
+              <Text style={styles.likeText}>{hasLiked ? '❤️' : '🤍'} {likes}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Video Proof Details */}
+        <View style={styles.detailsContent}>
+          <Text style={styles.sectionHeader}>About This Demonstration</Text>
+          <Text style={styles.descText}>{video.description}</Text>
+
+          <View style={styles.tagRow}>
+            {video.tags.map((tag) => (
+              <View key={tag} style={styles.tag}>
+                <Text style={styles.tagText}>#{tag}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Merchant Profile Strip */}
           <View style={styles.creatorCard}>
             <Image source={{ uri: video.userAvatar }} style={styles.creatorAvatar} />
             <View style={styles.creatorInfo}>
               <Text style={styles.creatorName}>
                 {video.userName} {video.userVerified ? '✓' : ''}
               </Text>
-              <Text style={styles.creatorRole}>Verified Creator</Text>
+              <Text style={styles.creatorRole}>Verified Merchant Studio</Text>
             </View>
             <TouchableOpacity style={styles.followButton}>
-              <Text style={styles.followButtonText}>Follow</Text>
+              <Text style={styles.followButtonText}>Follow Shop</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Description */}
-          <View style={styles.descBox}>
-            <Text style={styles.descText}>{video.description}</Text>
-            <View style={styles.tagRow}>
-              {video.tags.map((tag) => (
-                <View key={tag} style={styles.tag}>
-                  <Text style={styles.tagText}>#{tag}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* Comments Section */}
+          {/* Comments & Trust Reviews Section */}
           <View style={styles.commentsSection}>
-            <Text style={styles.commentsTitle}>Reviews & Comments ({comments.length})</Text>
+            <Text style={styles.commentsTitle}>Buyer Reviews & Proof Feedback ({comments.length})</Text>
 
             <View style={styles.commentInputRow}>
               <TextInput
                 style={styles.commentInput}
-                placeholder="Write a comment or review..."
-                placeholderTextColor="#777"
+                placeholder="Ask about specs or write a review..."
+                placeholderTextColor="#71717A"
                 value={newComment}
                 onChangeText={setNewComment}
               />
@@ -211,36 +236,41 @@ export const VideoDetailScreen: React.FC<VideoDetailScreenProps> = ({ video, onC
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#141414',
+    backgroundColor: '#000000',
   },
   navBar: {
-    height: 50,
-    backgroundColor: '#1E1E1E',
+    height: 54,
+    backgroundColor: '#0E0E0E',
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#333333',
+    borderBottomColor: '#1E1E1E',
   },
   backButton: {
     paddingVertical: 6,
-    paddingHorizontal: 8,
-    marginRight: 10,
+    paddingHorizontal: 6,
   },
   backButtonText: {
-    color: '#E50914',
+    color: '#D4FF32',
     fontSize: 14,
     fontWeight: '700',
   },
   navTitle: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     flex: 1,
+    textAlign: 'center',
+    marginHorizontal: 10,
+  },
+  saveHeaderBtn: {
+    padding: 6,
   },
   playerContainer: {
     width: '100%',
-    height: 230,
+    height: 250,
     backgroundColor: '#000000',
     position: 'relative',
   },
@@ -251,24 +281,48 @@ const styles = StyleSheet.create({
   },
   playerOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     justifyContent: 'space-between',
-    padding: 16,
+    padding: 14,
+  },
+  videoProofTag: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#333333',
+    gap: 6,
+  },
+  proofCheck: {
+    color: '#D4FF32',
+    fontWeight: '900',
+    fontSize: 12,
+  },
+  proofTagText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
   },
   playButton: {
     alignSelf: 'center',
-    marginTop: 50,
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: 'rgba(229, 9, 20, 0.9)',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    borderWidth: 1.5,
+    borderColor: '#D4FF32',
     justifyContent: 'center',
     alignItems: 'center',
   },
   playIcon: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: 'bold',
+    color: '#D4FF32',
+    fontSize: 22,
+    marginLeft: 3,
   },
   playerControlsBottom: {
     flexDirection: 'row',
@@ -285,75 +339,138 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   qualityBadge: {
-    paddingVertical: 4,
+    paddingVertical: 3,
     paddingHorizontal: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    borderRadius: 6,
+    backgroundColor: 'rgba(0,0,0,0.8)',
     borderWidth: 1,
-    borderColor: '#444444',
+    borderColor: '#333333',
   },
   qualityBadgeActive: {
-    backgroundColor: '#E50914',
-    borderColor: '#E50914',
+    backgroundColor: '#D4FF32',
+    borderColor: '#D4FF32',
   },
   qualityText: {
-    color: '#AAAAAA',
+    color: '#A1A1AA',
     fontSize: 11,
     fontWeight: '700',
   },
   qualityTextActive: {
-    color: '#FFFFFF',
+    color: '#000000',
   },
-  detailsContent: {
-    padding: 16,
+  purchaseBox: {
+    margin: 16,
+    backgroundColor: '#121212',
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#262626',
   },
-  videoTitle: {
+  productHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 14,
+  },
+  productTitle: {
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: '800',
-    lineHeight: 24,
+    fontFamily: Platform.OS === 'android' ? 'serif' : 'Georgia',
+    marginBottom: 4,
+  },
+  merchantSub: {
+    color: '#A1A1AA',
+    fontSize: 12,
+  },
+  priceTag: {
+    color: '#D4FF32',
+    fontSize: 20,
+    fontWeight: '800',
+    marginLeft: 12,
+  },
+  buyActionRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  buyButton: {
+    flex: 1,
+    backgroundColor: '#D4FF32',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  buyButtonText: {
+    color: '#000000',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  likeButton: {
+    backgroundColor: '#1E1E1E',
+    borderWidth: 1,
+    borderColor: '#333333',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  likeButtonActive: {
+    borderColor: '#D4FF32',
+  },
+  likeText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  detailsContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 40,
+  },
+  sectionHeader: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
     marginBottom: 6,
   },
-  statsLine: {
-    color: '#999999',
-    fontSize: 12,
-    marginBottom: 16,
+  descText: {
+    color: '#A1A1AA',
+    fontSize: 13,
+    lineHeight: 20,
+    marginBottom: 12,
   },
-  actionRow: {
+  tagRow: {
     flexDirection: 'row',
-    gap: 12,
+    flexWrap: 'wrap',
+    gap: 6,
     marginBottom: 20,
   },
-  actionBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 6,
-    backgroundColor: '#262626',
-    alignItems: 'center',
+  tag: {
+    backgroundColor: '#161616',
     borderWidth: 1,
-    borderColor: '#3a3a3a',
+    borderColor: '#262626',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
   },
-  actionBtnActive: {
-    backgroundColor: '#E50914',
-    borderColor: '#E50914',
-  },
-  actionBtnText: {
-    color: '#FFFFFF',
-    fontSize: 13,
+  tagText: {
+    color: '#D4FF32',
+    fontSize: 11,
     fontWeight: '600',
   },
   creatorCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1E1E1E',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
+    backgroundColor: '#121212',
+    padding: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#222222',
+    marginBottom: 24,
   },
   creatorAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     marginRight: 12,
   },
   creatorInfo: {
@@ -361,59 +478,32 @@ const styles = StyleSheet.create({
   },
   creatorName: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
   },
   creatorRole: {
-    color: '#888888',
+    color: '#71717A',
     fontSize: 12,
   },
   followButton: {
-    backgroundColor: '#E50914',
+    backgroundColor: '#222222',
+    borderWidth: 1,
+    borderColor: '#333333',
     paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderRadius: 4,
+    paddingHorizontal: 12,
+    borderRadius: 8,
   },
   followButtonText: {
     color: '#FFFFFF',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
-  },
-  descBox: {
-    backgroundColor: '#1A1A1A',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  descText: {
-    color: '#CCCCCC',
-    fontSize: 13,
-    lineHeight: 19,
-    marginBottom: 10,
-  },
-  tagRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  tag: {
-    backgroundColor: '#2E2E2E',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 4,
-  },
-  tagText: {
-    color: '#E50914',
-    fontSize: 11,
-    fontWeight: '600',
   },
   commentsSection: {
     marginTop: 8,
-    marginBottom: 40,
   },
   commentsTitle: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
     marginBottom: 12,
   },
@@ -424,37 +514,39 @@ const styles = StyleSheet.create({
   },
   commentInput: {
     flex: 1,
-    backgroundColor: '#262626',
+    backgroundColor: '#161616',
     borderWidth: 1,
-    borderColor: '#3a3a3a',
-    borderRadius: 6,
+    borderColor: '#282828',
+    borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
     color: '#FFFFFF',
     fontSize: 13,
   },
   sendCommentButton: {
-    backgroundColor: '#E50914',
+    backgroundColor: '#D4FF32',
     justifyContent: 'center',
     paddingHorizontal: 16,
-    borderRadius: 6,
+    borderRadius: 10,
   },
   sendCommentText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    color: '#000000',
+    fontWeight: '800',
     fontSize: 13,
   },
   commentItem: {
     flexDirection: 'row',
-    marginBottom: 14,
-    backgroundColor: '#1A1A1A',
-    padding: 10,
-    borderRadius: 8,
+    marginBottom: 12,
+    backgroundColor: '#121212',
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#1E1E1E',
   },
   commentAvatar: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     marginRight: 10,
   },
   commentBody: {
@@ -463,7 +555,7 @@ const styles = StyleSheet.create({
   commentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   commentUser: {
     color: '#FFFFFF',
@@ -471,13 +563,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   commentTime: {
-    color: '#777777',
+    color: '#71717A',
     fontSize: 11,
   },
   commentText: {
-    color: '#DDDDDD',
-    fontSize: 13,
+    color: '#D4D4D8',
+    fontSize: 12,
     lineHeight: 18,
   },
 });
-
