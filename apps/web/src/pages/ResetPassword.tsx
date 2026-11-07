@@ -35,7 +35,7 @@ const ResetPassword = () => {
         }
         setVerifying(true);
         try {
-            console.log("email: ", form.email, "code: ", form.code)
+            // console.log("email: ", form.email, "code: ", form.code)
             const response = await AuthService.VerifyResetCode(form.email, form.code);
             if (response?.Success) {
                 setOtpVerified(true);

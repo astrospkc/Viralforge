@@ -1,105 +1,110 @@
-import { ArrowRight, Play } from 'lucide-react';
+import { ArrowRight, Play, MapPin, Store, Sparkles, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth_store';
 
 const Hero = () => {
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuthStore()
+    const { isAuthenticated } = useAuthStore();
 
     return (
-        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
-            {/* Background image from Unsplash — cinematic video/camera setup */}
-            <div className="absolute inset-0">
+        <div className="relative min-h-[92vh] w-full flex items-center justify-center overflow-hidden pt-24 pb-16">
+            {/* Cinematic dark grey canvas background with ambient warm yellow & soft violet glow */}
+            <div className="absolute inset-0 bg-[#0E1015]">
+                {/* Subtle photography backdrop with soft dark grade */}
                 <img
-                    src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1800&auto=format&fit=crop&q=80"
-                    alt="Cinematic background"
-                    className="w-full h-full object-cover object-center scale-105"
-                    style={{ filter: 'brightness(0.28) saturate(1.1)' }}
+                    src="https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1800&auto=format&fit=crop&q=80"
+                    alt="Physical store showcase"
+                    className="w-full h-full object-cover object-center opacity-15 filter saturate-50"
                 />
-                {/* Multi-stop color gradient overlay for transition into next section */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-[#1a0305]/40 to-[#0d0000]" />
-                {/* Red glow orbs */}
-                <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-red-700/15 rounded-full blur-[130px]" />
-                <div className="absolute bottom-0 right-1/4 w-[400px] h-[300px] bg-rose-900/10 rounded-full blur-[100px]" />
+                {/* Radial ambient lighting: Light violet top-right & warm yellow bottom-left */}
+                <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-violet-500/10 rounded-full blur-[140px] pointer-events-none" />
+                <div className="absolute bottom-10 left-1/4 w-[450px] h-[450px] bg-yellow-400/10 rounded-full blur-[130px] pointer-events-none" />
+                {/* Multi-layer gradient mask for contrast */}
+                <div className="absolute inset-0 bg-gradient-to-b from-[#0E1015]/80 via-[#0E1015]/90 to-[#0E1015]" />
             </div>
 
-            {/* Floating pill badges */}
-            <div className="absolute top-32 left-8 md:left-20 hidden md:flex items-center gap-2 bg-white/5 border border-white/10 backdrop-blur-md px-4 py-2 rounded-full text-xs text-gray-300">
-                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                HLS Adaptive Streaming
-            </div>
-            <div className="absolute top-44 right-8 md:right-20 hidden md:flex items-center gap-2 bg-white/5 border border-white/10 backdrop-blur-md px-4 py-2 rounded-full text-xs text-gray-300">
-                <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
-                360p · 720p · 1080p
+            {/* Floating live indicator badges with gentle float animation */}
+            <div className="absolute top-28 left-6 md:left-16 hidden lg:flex items-center gap-2.5 bg-[#161922]/90 border border-violet-300/20 backdrop-blur-md px-3.5 py-2 rounded-2xl text-xs text-slate-200 shadow-xl shadow-black/40 animate-float-slow">
+                <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+                <MapPin size={13} className="text-violet-300" />
+                <span className="font-medium">5km Local Radius Discovery</span>
             </div>
 
-            {/* Content */}
-            <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-5xl mx-auto pt-20">
-                {/* Eyebrow label */}
-                <div className="inline-flex items-center gap-2 bg-red-600/15 border border-red-500/30 px-4 py-1.5 rounded-full mb-8">
-                    <Play size={12} className="text-red-400 fill-red-400" />
-                    <span className="text-red-300 text-xs font-semibold tracking-widest uppercase">Video-First Platform</span>
+            <div className="absolute top-36 right-6 md:right-16 hidden lg:flex items-center gap-2.5 bg-[#161922]/90 border border-yellow-400/25 backdrop-blur-md px-3.5 py-2 rounded-2xl text-xs text-slate-200 shadow-xl shadow-black/40 animate-float-delayed">
+                <ShieldCheck size={14} className="text-yellow-400" />
+                <span className="font-semibold text-white">Live Verified Stock</span>
+                <span className="text-[10px] bg-violet-400/20 text-violet-200 px-1.5 py-0.5 rounded font-bold">Auto-Screened</span>
+            </div>
+
+            {/* Main Center Content */}
+            <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-4xl mx-auto">
+                {/* Eyebrow Pill */}
+                <div className="inline-flex items-center gap-2 bg-[#1A1F2B] border border-violet-300/25 px-4 py-1.5 rounded-full mb-7 shadow-sm">
+                    <Sparkles size={13} className="text-yellow-400" />
+                    <span className="text-violet-200 text-xs font-bold tracking-wide uppercase">
+                        Video-First · Location-Aware Product Discovery
+                    </span>
                 </div>
 
-                {/* Main heading */}
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight mb-6 text-white">
-                    Showcase your work.{' '}
-                    <span
-                        style={{
-                            background: 'linear-gradient(135deg, #ff6b6b 0%, #E50914 50%, #c2185b 100%)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
-                        }}
-                    >
-                        Let video
-                    </span>{' '}
-                    build trust.
+                {/* Main Headline */}
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.08] tracking-tight mb-6 text-white">
+                    Discover products nearby.{' '}
+                    <span className="block mt-1 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-300 bg-clip-text text-transparent">
+                        Watch before you buy.
+                    </span>
                 </h1>
 
-                <p className="text-lg md:text-xl text-gray-300 font-normal max-w-2xl mb-12 leading-relaxed">
-                    Upload proof-based videos, get discovered by your ideal clients, and let your work speak louder than any pitch.
+                {/* Subtitle */}
+                <p className="text-base sm:text-lg md:text-xl text-slate-300 font-normal max-w-2xl mb-10 leading-relaxed">
+                    ViralForge connects you with local shops and creator showcases through authentic short videos.
+                    Check verified stock, compare prices, and navigate to physical stores.
                 </p>
 
-                {/* CTA buttons */}
-                <div className="flex flex-col sm:flex-row gap-4 items-center">
-                    {!isAuthenticated &&
-                        <button
-                            onClick={() => navigate('/signup')}
-                            style={{ background: 'linear-gradient(135deg, #E50914, #c2185b)' }}
-                            className="group flex items-center gap-2 text-white px-8 py-4 rounded-lg font-semibold text-base transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-red-900/50"
-                        >
-                            Start Creating Free
-                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                        </button>
-                    }
-
+                {/* CTA Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-3.5 items-center w-full sm:w-auto">
                     <button
                         onClick={() => navigate('/browse')}
-                        className="flex items-center gap-2 text-gray-300 hover:text-white border border-white/15 hover:border-red-500/50 px-8 py-4 rounded-lg font-medium text-base transition-all duration-300 backdrop-blur-sm"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2.5 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-bold px-7 py-3.5 rounded-xl text-sm transition-all duration-200 hover:scale-[1.02] shadow-lg shadow-yellow-500/20"
                     >
-                        <Play size={16} className="fill-current" />
-                        Browse Videos
+                        <Play size={16} className="fill-slate-950" />
+                        Explore Video Feed & Map
                     </button>
+
+                    {!isAuthenticated ? (
+                        <button
+                            onClick={() => navigate('/signup')}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#1A1F2C] hover:bg-[#23293B] text-violet-200 hover:text-white border border-violet-300/25 px-6 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200"
+                        >
+                            <Store size={16} className="text-yellow-400" />
+                            List Your Shop & Products
+                            <ArrowRight size={15} />
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => navigate('/transcode')}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#1A1F2C] hover:bg-[#23293B] text-violet-200 hover:text-white border border-violet-300/25 px-6 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200"
+                        >
+                            Upload Product Video
+                            <ArrowRight size={15} />
+                        </button>
+                    )}
                 </div>
 
-                {/* Stats row */}
-                <div className="flex items-center gap-10 mt-16 pt-8 border-t border-white/10">
+                {/* Proof Metrics Bar */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 mt-14 pt-8 border-t border-slate-800/80 w-full max-w-3xl">
                     {[
-                        { value: 'HLS', label: 'Adaptive Streaming' },
-                        { value: '3x', label: 'Quality Levels' },
-                        { value: '∞', label: 'Video Uploads' },
-                    ].map((stat) => (
-                        <div key={stat.label} className="text-center">
-                            <div className="text-2xl font-black text-white">{stat.value}</div>
-                            <div className="text-xs text-gray-500 mt-1 tracking-wide">{stat.label}</div>
+                        { label: 'Video Showcase', desc: 'Real uncut product demos' },
+                        { label: 'Location Map', desc: 'Find shops in 5km radius' },
+                        { label: 'Stock & Pricing', desc: 'Transparent availability' },
+                        { label: 'Direct Contact', desc: 'Call, directions, or order' },
+                    ].map((item, idx) => (
+                        <div key={idx} className="flex flex-col items-center sm:items-start text-center sm:text-left">
+                            <span className="text-yellow-400 font-bold text-sm tracking-tight">{item.label}</span>
+                            <span className="text-xs text-slate-400 mt-0.5">{item.desc}</span>
                         </div>
                     ))}
                 </div>
             </div>
-
-            {/* Bottom fade — transitions into red-tinted section */}
-            <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0d0000] to-transparent" />
         </div>
     );
 };

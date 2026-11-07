@@ -35,7 +35,7 @@ const SignUp = () => {
         try {
 
             const response = await AuthService.SignUp(formData);
-            console.log("register response :", response);
+            // console.log("register response :", response);
             if (response?.Success) {
                 localStorage.setItem("token", response.Token);
                 setToken(response.Token);

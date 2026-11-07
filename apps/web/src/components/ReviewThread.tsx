@@ -20,13 +20,28 @@ const ReviewThread = ({ videoId: videoId, token }:
 
     // fetch reviews for a particular videoId;
     useEffect(() => {
+        let isMounted = true;
         const getReviews = async () => {
-            const response = await CommentService.getTopLevelComments(videoId, token)
-            console.log("response data: ", response.Data)
-            setReviews(response.Data)
-        }
-        getReviews()
-    }, [videoId])
+            try {
+                if (!videoId) return;
+                const response = await CommentService.getTopLevelComments(videoId, token);
+                if (isMounted) {
+                    if (Array.isArray(response?.Data)) {
+                        setReviews(response.Data);
+                    } else {
+                        setReviews([]);
+                    }
+                }
+            } catch (err) {
+                console.warn("Could not fetch reviews:", err);
+                if (isMounted) setReviews([]);
+            }
+        };
+        getReviews();
+        return () => {
+            isMounted = false;
+        };
+    }, [videoId, token]);
 
 
     // const avgRating = reviews?.length ? Math.round(reviews.reduce((a, r) => a + r.rating, 0) / reviews.length) : 0;

@@ -27,6 +27,7 @@ export interface MobileVideoItem {
   masterCdnUrl: string;
   tags: string[];
   time: string;
+  location?: import('@viralforge/shared').LocationData;
 }
 
 export interface StudioMetric {

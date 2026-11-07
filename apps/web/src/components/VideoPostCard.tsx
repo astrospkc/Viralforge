@@ -1,51 +1,80 @@
-import { Bookmark, CheckCircle, Heart, MessageCircle, MoreHorizontal, Play, Share2 } from "lucide-react";
+import { Bookmark, CheckCircle, Heart, MessageCircle, MoreHorizontal, Play, Share2, MapPin } from "lucide-react";
 import ReviewThread from "./ReviewThread";
 //import { CommentService } from "../services/comment_service";
 import { useAuthStore } from "../store/auth_store";
 //import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import type { VideoPost } from "../../types";
+import type { VideoPost, LocationData } from "../../types";
 import VideoModal from "./VideoModal";
 
-const VideoPostCard = ({ post, currentUserName }: { post: VideoPost; currentUserName: string }) => {
+const VideoPostCard = ({
+    post,
+    currentUserName,
+    onSelectLocation,
+}: {
+    post: VideoPost;
+    currentUserName: string;
+    onSelectLocation?: (location: LocationData) => void;
+}) => {
     const [liked, setLiked] = useState(false);
-    const [likes, setLikes] = useState(post.likes);
+    const [likes, setLikes] = useState(typeof post.likes === 'number' ? post.likes : 0);
     const [saved, setSaved] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [showShare, setShowShare] = useState(false);
 
-    // for this initial review section , we can use zustand for this and later at stage we can memoize it.
-
     const token = useAuthStore((state) => state.token);
     const toggleLike = () => { setLiked(p => !p); setLikes(p => liked ? p - 1 : p + 1); };
-    const fmtLikes = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
+    const fmtLikes = (n: number) => {
+        const num = Number(n) || 0;
+        return num >= 1000 ? `${(num / 1000).toFixed(1)}K` : String(num);
+    };
 
-    // const video_id = post.id
-    // const { data: comments } = useQuery({
-    //     queryKey: ["comments", video_id],
-    //     queryFn: () => CommentService.getTopLevelComments(video_id, token)
-    // })
-
-
-    // console.log("video post details: ", post)
-
-
+    const authorName = post.userName || currentUserName || 'Creator';
+    const authorAvatar = post.userAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop';
+    const thumbnail = post.thumbnail || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop';
+    const quality = post?.qualities?.[0]?.quality || '1080p';
+    const duration = post.duration || '2:30';
+    const views = post.views || '1.2K';
+    const reviewCount = Array.isArray(post.reviews) ? post.reviews.length : 0;
 
     return (
         <article className="bg-[#1a1a1a] rounded-2xl overflow-hidden border border-white/5 hover:border-white/10 transition-all duration-300 group">
             {/* ── Author bar ── */}
             <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-                <img src={post.userAvatar} alt={post.userName} className="w-9 h-9 rounded-full border border-white/10" />
+                <img
+                    src={authorAvatar}
+                    alt={authorName}
+                    className="w-9 h-9 rounded-full border border-white/10 object-cover"
+                    onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop';
+                    }}
+                />
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-
-                        <span className="text-sm font-bold text-white truncate">{currentUserName}</span>
+                        <span className="text-sm font-bold text-white truncate">{authorName}</span>
                         {post.userVerified && <CheckCircle size={13} className="text-red-400 fill-red-400 shrink-0" />}
                     </div>
-                    <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-                        <span>{post.time}</span>
+                    <div className="flex items-center gap-1.5 text-gray-500 text-xs flex-wrap">
+                        <span>{post.time || 'recently'}</span>
                         <span>·</span>
-                        <span className="capitalize">{post.category}</span>
+                        <span className="capitalize">{post.category || 'proof'}</span>
+                        {post.location && (
+                            <>
+                                <span>·</span>
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onSelectLocation?.(post.location!);
+                                    }}
+                                    className="inline-flex items-center gap-0.5 text-gray-400 hover:text-red-400 bg-white/5 hover:bg-red-500/10 px-1.5 py-0.5 rounded border border-white/5 transition-colors"
+                                    title={`Filter by ${post.location.city}`}
+                                >
+                                    <MapPin size={10} className="text-red-500" />
+                                    <span>{post.location.city}</span>
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
                 <button className="text-gray-600 hover:text-gray-300 transition-colors">
@@ -55,13 +84,13 @@ const VideoPostCard = ({ post, currentUserName }: { post: VideoPost; currentUser
 
             {/* ── Title & Description ── */}
             <div className="px-4 mb-3">
-                <h2 className="text-base font-bold text-white mb-1 leading-snug">{post.title}</h2>
-                <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">{post.description}</p>
+                <h2 className="text-base font-bold text-white mb-1 leading-snug">{post.title || 'Product Proof Demonstration'}</h2>
+                <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">{post.description || ''}</p>
             </div>
 
             {/* ── Tags ── */}
             <div className="px-4 mb-3 flex flex-wrap gap-1.5">
-                {post.tags && post.tags.map(t => (
+                {Array.isArray(post.tags) && post.tags.map(t => (
                     <span key={t} className="bg-white/5 border border-white/8 text-gray-400 text-xs px-2 py-0.5 rounded-full">
                         #{t}
                     </span>
@@ -69,24 +98,27 @@ const VideoPostCard = ({ post, currentUserName }: { post: VideoPost; currentUser
             </div>
 
             {/* ── Thumbnail / Player ── */}
-            <div className="relative aspect-video overflow-hidden cursor-pointer" onClick={() => setModalOpen(true)}>
+            <div className="relative aspect-video overflow-hidden cursor-pointer bg-black/40" onClick={() => setModalOpen(true)}>
                 <img
-                    src={post?.thumbnail}
-                    alt={post.title}
+                    src={thumbnail}
+                    alt={post.title || 'Video Proof'}
                     className="w-full h-full object-cover group-hover:scale-[1.05] transition-transform duration-700"
                     style={{ filter: 'brightness(0.85)' }}
+                    onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop';
+                    }}
                 />
                 {/* Quality badge */}
                 <span className="absolute top-3 left-3 bg-black/70 border border-white/20 text-white text-xs px-2 py-0.5 rounded font-bold backdrop-blur-sm">
-                    {post?.qualities?.[0]?.quality}
+                    {quality}
                 </span>
                 {/* Duration */}
                 <span className="absolute bottom-3 right-3 bg-black/80 text-white text-xs px-2 py-0.5 rounded font-mono">
-                    {post.duration}
+                    {duration}
                 </span>
                 {/* Views */}
                 <span className="absolute bottom-3 left-3 text-gray-300 text-xs font-medium">
-                    {post.views} views
+                    {views} views
                 </span>
                 {/* Play overlay */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/20 backdrop-blur-[2px]">
@@ -104,10 +136,10 @@ const VideoPostCard = ({ post, currentUserName }: { post: VideoPost; currentUser
                     <span className={`text-xs font-semibold transition-colors ${liked ? 'text-red-400' : 'text-gray-500'}`}>{fmtLikes(likes)}</span>
                 </button>
 
-                {/* Reviews count (opens on click to section below) */}
+                {/* Reviews count */}
                 <div className="flex items-center gap-1.5 text-gray-500">
                     <MessageCircle size={17} />
-                    <span className="text-xs font-semibold">{post.reviews?.length} reviews</span>
+                    <span className="text-xs font-semibold">{reviewCount} reviews</span>
                 </div>
 
                 {/* Share */}
