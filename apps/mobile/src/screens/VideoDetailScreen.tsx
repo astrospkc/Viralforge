@@ -147,7 +147,8 @@ export const VideoDetailScreen: React.FC<VideoDetailScreenProps> = ({ video, onC
                 {video.productName || video.title}
               </Text>
               <Text style={styles.merchantSub}>
-                Sold by <Text style={{ color: '#FFFFFF', fontWeight: '700' }}>{video.shopName || video.userName}</Text> • In Stock
+                Sold by <Text style={{ color: '#FFFFFF', fontWeight: '700' }}>{video.shopName || video.userName}</Text>
+                {video.location ? ` • 📍 ${video.location.city}, ${video.location.country}` : ' • In Stock'}
               </Text>
             </View>
             <Text style={styles.priceTag}>{video.productPrice || '$149.00'}</Text>
@@ -173,6 +174,13 @@ export const VideoDetailScreen: React.FC<VideoDetailScreenProps> = ({ video, onC
           <Text style={styles.descText}>{video.description}</Text>
 
           <View style={styles.tagRow}>
+            {video.location && (
+              <View style={[styles.tag, { borderColor: 'rgba(212, 255, 50, 0.4)', backgroundColor: 'rgba(212, 255, 50, 0.1)' }]}>
+                <Text style={[styles.tagText, { color: '#D4FF32', fontWeight: '700' }]}>
+                  📍 {video.location.city}, {video.location.country}
+                </Text>
+              </View>
+            )}
             {video.tags.map((tag) => (
               <View key={tag} style={styles.tag}>
                 <Text style={styles.tagText}>#{tag}</Text>

@@ -34,6 +34,7 @@ const MOCK_VIDEOS: MobileVideoItem[] = [
     masterCdnUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
     tags: ['SaaS', 'React', 'Node.js'],
     time: '3h ago',
+    location: { city: 'San Francisco', state: 'CA', country: 'USA', latitude: 37.7749, longitude: -122.4194 },
   },
   {
     id: 2,
@@ -55,6 +56,7 @@ const MOCK_VIDEOS: MobileVideoItem[] = [
     masterCdnUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
     tags: ['Shopify', 'UI/UX', 'Design'],
     time: '5h ago',
+    location: { city: 'New York', state: 'NY', country: 'USA', latitude: 40.7128, longitude: -74.0060 },
   },
   {
     id: 3,
@@ -75,6 +77,7 @@ const MOCK_VIDEOS: MobileVideoItem[] = [
     masterCdnUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
     tags: ['Branding', 'Figma', 'Identity'],
     time: '7h ago',
+    location: { city: 'London', country: 'UK', latitude: 51.5074, longitude: -0.1278 },
   },
   {
     id: 4,
@@ -95,6 +98,7 @@ const MOCK_VIDEOS: MobileVideoItem[] = [
     masterCdnUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
     tags: ['Agency', 'Marketing', 'Portfolio'],
     time: '1d ago',
+    location: { city: 'Berlin', country: 'Germany', latitude: 52.5200, longitude: 13.4050 },
   },
 ];
 
