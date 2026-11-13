@@ -141,33 +141,34 @@ export const LocationVideoMap: React.FC<LocationVideoMapProps> = ({
             el.style.cursor = 'pointer';
 
             const thumb = vids[0]?.thumbnail || vids[0]?.userAvatar || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=200&fit=crop';
+            const hasShop = Boolean(vids[0]?.shop);
 
             el.innerHTML = `
                 <div class="relative group flex items-center justify-center transition-transform duration-300 hover:scale-125" style="transform: translate(-50%, -50%);">
-                    <div class="w-10 h-10 rounded-full border-2 ${isCurrentSelected ? 'border-[#E50914] scale-110 shadow-lg shadow-red-600/50' : 'border-white/90 shadow-md shadow-black/80'} overflow-hidden bg-[#181818] relative flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-full border-2 ${isCurrentSelected ? 'border-yellow-400 scale-110 shadow-lg shadow-yellow-500/50' : 'border-white/90 shadow-md shadow-black/80'} overflow-hidden bg-[#181818] relative flex items-center justify-center">
                         <img src="${thumb}" class="w-full h-full object-cover" onerror="this.style.display='none'" />
                         <span class="absolute inset-0 flex items-center justify-center text-xs">📍</span>
-                        <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
-                            <span class="text-[9px] font-black text-white bg-red-600/90 px-1 rounded-sm">${vids.length}</span>
+                        <div class="absolute inset-0 bg-black/25 flex items-center justify-center">
+                            <span class="text-[9px] font-black text-slate-950 bg-yellow-400 px-1 rounded-sm">${vids.length}</span>
                         </div>
                     </div>
-                    <div class="absolute -bottom-1.5 w-2 h-2 bg-red-600 rotate-45 border-r border-b border-black"></div>
+                    <div class="absolute -bottom-1.5 w-2 h-2 bg-yellow-400 rotate-45 border-r border-b border-black"></div>
                 </div>
             `;
 
             // Popup HTML
             const popupHtml = `
-                <div style="background: #181818; color: #fff; padding: 10px; border-radius: 12px; font-family: sans-serif; min-width: 200px; border: 1px solid rgba(255,255,255,0.1);">
-                    <div style="font-size: 11px; color: #E50914; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
+                <div style="background: #141722; color: #fff; padding: 12px; border-radius: 12px; font-family: sans-serif; min-width: 220px; border: 1px solid rgba(196,181,253,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+                    <div style="font-size: 10px; color: #FACC15; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;">
                         📍 ${loc.city}, ${loc.state || loc.country}
                     </div>
-                    <div style="font-size: 13px; font-weight: bold; margin-bottom: 4px; line-height: 1.2;">
-                        ${vids[0]?.title || 'Video Proof'}
+                    <div style="font-size: 13px; font-weight: bold; margin-bottom: 4px; line-height: 1.2; color: #fff;">
+                        ${vids[0]?.shop?.name || vids[0]?.title || 'Video Proof'}
                     </div>
-                    <div style="font-size: 11px; color: #aaa; margin-bottom: 8px;">
-                        ${vids.length} proof video${vids.length > 1 ? 's' : ''} • By ${vids[0]?.userName || 'Creator'}
+                    <div style="font-size: 11px; color: #94A3B8; margin-bottom: 8px;">
+                        ${vids.length} video proof${vids.length > 1 ? 's' : ''} ${hasShop ? '· Verified Shop' : `• By ${vids[0]?.userName || 'Creator'}`}
                     </div>
-                    <button id="popup-filter-btn-${loc.city.replace(/\s+/g, '-')}" style="width: 100%; background: #E50914; color: #fff; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">
+                    <button id="popup-filter-btn-${loc.city.replace(/\s+/g, '-')}" style="width: 100%; background: #FACC15; color: #0F172A; border: none; padding: 7px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer; transition: background 0.2s;">
                         Filter Videos in ${loc.city}
                     </button>
                 </div>
@@ -256,15 +257,15 @@ export const LocationVideoMap: React.FC<LocationVideoMapProps> = ({
         <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-[#0e0e0e] shadow-2xl transition-all">
             {/* Top Toolbar Overlay on Map */}
             <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
-                <div className="flex items-center gap-2 pointer-events-auto bg-[#141414]/90 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-xl shadow-lg">
-                    <MapPin size={14} className="text-red-500 shrink-0" />
+                <div className="flex items-center gap-2 pointer-events-auto bg-[#141722]/95 backdrop-blur-md border border-violet-300/20 px-3 py-1.5 rounded-xl shadow-lg">
+                    <MapPin size={14} className="text-yellow-400 shrink-0" />
                     <span className="text-xs font-bold text-white">
-                        {selectedLocation ? `Filtered: ${selectedLocation.city}, ${selectedLocation.country}` : 'Explore Videos by Location'}
+                        {selectedLocation ? `Filtered: ${selectedLocation.city}, ${selectedLocation.country}` : 'Explore Videos & Shops by Location'}
                     </span>
                     {selectedLocation && (
                         <button
                             onClick={() => onSelectLocation(null)}
-                            className="ml-1 text-gray-400 hover:text-white p-0.5 rounded-full hover:bg-white/10 transition-colors"
+                            className="ml-1 text-slate-400 hover:text-white p-0.5 rounded-full hover:bg-white/10 transition-colors"
                             title="Reset location filter"
                         >
                             <X size={13} />
@@ -277,11 +278,11 @@ export const LocationVideoMap: React.FC<LocationVideoMapProps> = ({
                     <button
                         onClick={handleUseMyLocation}
                         disabled={isLocating}
-                        className="flex items-center gap-1.5 bg-[#141414]/90 hover:bg-[#202020] text-gray-200 hover:text-white border border-white/10 px-3 py-1.5 rounded-xl text-xs font-bold backdrop-blur-md transition-all shadow-lg"
+                        className="flex items-center gap-1.5 bg-[#141722]/95 hover:bg-[#1E2333] text-slate-200 hover:text-white border border-violet-300/20 px-3 py-1.5 rounded-xl text-xs font-bold backdrop-blur-md transition-all shadow-lg"
                         title="Find videos near me"
                     >
-                        <Navigation size={13} className={isLocating ? 'animate-spin text-red-500' : 'text-red-500'} />
-                        <span>{isLocating ? 'Locating…' : 'Near Me'}</span>
+                        <Navigation size={13} className={isLocating ? 'animate-spin text-yellow-400' : 'text-yellow-400'} />
+                        <span>{isLocating ? 'Locating…' : 'Near Me (5km)'}</span>
                     </button>
 
                     {/* Reset Zoom */}
@@ -290,7 +291,7 @@ export const LocationVideoMap: React.FC<LocationVideoMapProps> = ({
                             onSelectLocation(null);
                             mapRef.current?.flyTo({ center: [-20, 25], zoom: 1.8 });
                         }}
-                        className="bg-[#141414]/90 hover:bg-[#202020] text-gray-300 hover:text-white border border-white/10 p-2 rounded-xl text-xs font-bold backdrop-blur-md transition-all shadow-lg"
+                        className="bg-[#141722]/95 hover:bg-[#1E2333] text-slate-300 hover:text-white border border-violet-300/20 p-2 rounded-xl text-xs font-bold backdrop-blur-md transition-all shadow-lg"
                         title="World View"
                     >
                         <Layers size={13} />

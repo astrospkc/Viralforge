@@ -1,4 +1,4 @@
-import { Bookmark, CheckCircle, Heart, MessageCircle, MoreHorizontal, Play, Share2, MapPin } from "lucide-react";
+import { Bookmark, CheckCircle, Heart, MessageCircle, MoreHorizontal, Play, Share2, MapPin, ShoppingBag } from "lucide-react";
 import ReviewThread from "./ReviewThread";
 //import { CommentService } from "../services/comment_service";
 import { useAuthStore } from "../store/auth_store";
@@ -83,10 +83,40 @@ const VideoPostCard = ({
             </div>
 
             {/* ── Title & Description ── */}
-            <div className="px-4 mb-3">
+            <div className="px-4 mb-2">
                 <h2 className="text-base font-bold text-white mb-1 leading-snug">{post.title || 'Product Proof Demonstration'}</h2>
                 <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">{post.description || ''}</p>
             </div>
+
+            {/* ── Product & Shop Card Pill ── */}
+            {(post.product || post.shop || post.shop_listing) && (
+                <div className="mx-4 mb-3 p-2.5 rounded-xl bg-[#141722] border border-violet-300/15 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2 truncate">
+                        <ShoppingBag size={14} className="text-yellow-400 shrink-0" />
+                        <span className="font-semibold text-white truncate">
+                            {post.product?.name || post.shop?.name || 'Verified Product'}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                        {post.shop_listing?.price !== undefined && (
+                            <span className="font-bold text-yellow-400">
+                                {post.shop_listing.currency === 'INR' ? '₹' : (post.shop_listing.currency || '$')}
+                                {Number(post.shop_listing.price).toLocaleString()}
+                            </span>
+                        )}
+                        {post.shop_listing?.availability && (
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                                post.shop_listing.availability === 'AVAILABLE'
+                                    ? 'bg-green-500/10 text-green-400'
+                                    : 'bg-red-500/10 text-red-400'
+                            }`}>
+                                {post.shop_listing.availability === 'AVAILABLE' ? 'In Stock' : 'Out'}
+                            </span>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* ── Tags ── */}
             <div className="px-4 mb-3 flex flex-wrap gap-1.5">

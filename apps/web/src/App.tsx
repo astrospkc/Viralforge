@@ -6,6 +6,7 @@ import MainPage from './pages/MainPage';
 import TranscodingPage from './pages/TranscodingPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import VideoEditorPage from './pages/VideoEditorPage';
 import { Toaster } from 'react-hot-toast';
 import { useAuthStore } from './store/auth_store';
 import PageNotFound from './pages/PageNotFound';
@@ -23,6 +24,7 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/browse" element={<MainPage />} />
+        <Route path="/editor" element={<VideoEditorPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 

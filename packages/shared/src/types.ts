@@ -60,6 +60,138 @@ export const POPULAR_LOCATIONS: LocationData[] = [
     { city: 'Paris', country: 'France', latitude: 48.8566, longitude: 2.3522 },
 ];
 
+// Enums from location_merchant_architecture.md
+export type BusinessType = 'RETAIL' | 'ONLINE' | 'SERVICE';
+export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
+export type StockAvailability = 'AVAILABLE' | 'UNKNOWN' | 'OUT_OF_STOCK';
+export type ShopStatus = 'ACTIVE' | 'INACTIVE';
+
+export interface MerchantProfile {
+    id: number;
+    owner_user_id: number;
+    business_name: string;
+    business_description: string;
+    business_type: BusinessType;
+    verification_status: VerificationStatus;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface Shop {
+    id: number;
+    merchant_id: number;
+    name: string;
+    description?: string;
+    phone?: string;
+    address: string;
+    city: string;
+    state?: string;
+    pincode?: string;
+    country: string;
+    latitude: number;
+    longitude: number;
+    status: ShopStatus;
+    verification_status: VerificationStatus;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export interface Product {
+    id: number;
+    name: string;
+    brand?: string;
+    description?: string;
+    specifications?: Record<string, any>;
+    category?: string;
+}
+
+export interface ShopProductListing {
+    id: number;
+    shop_id: number;
+    product_id: number;
+    price: number;
+    currency: string;
+    availability: StockAvailability;
+    stock_updated_at: string;
+    status: 'ACTIVE' | 'INACTIVE';
+    product?: Product;
+}
+
+export interface NearbyShopResult {
+    id?: number;
+    shop_id?: number;
+    merchant_id: number;
+    name: string;
+    shop_name?: string;
+    description?: string;
+    phone?: string;
+    address: string;
+    city: string;
+    state?: string;
+    pincode?: string;
+    country: string;
+    latitude: number;
+    longitude: number;
+    price?: number;
+    availability?: StockAvailability;
+    verification_status?: VerificationStatus;
+    distance_meters?: number;
+}
+
+export interface VideoDetailsResponse {
+    video: {
+        id: number;
+        title: string;
+        description: string;
+        playback_url?: string;
+        masterCdnUrl?: string;
+        thumbnail: string;
+        status: string;
+        duration: number;
+    };
+    creator?: {
+        user_id: number;
+        name: string;
+        avatar: string;
+    };
+    merchant?: {
+        id: number;
+        business_name: string;
+        business_type: BusinessType;
+    };
+    shop?: {
+        id: number;
+        name: string;
+        address: string;
+        phone: string;
+        latitude: number;
+        longitude: number;
+    };
+    product?: Product;
+    shop_listing?: {
+        id: number;
+        price: number;
+        currency: string;
+        availability: StockAvailability;
+        stock_updated_at: string;
+        status?: ShopStatus;
+        shop_id?: number;
+        product_id?: number;
+    };
+}
+
+export interface CustomerSavedLocation {
+    id: number;
+    user_id: number;
+    label: string;
+    address: string;
+    city: string;
+    pincode?: string;
+    latitude: number;
+    longitude: number;
+    created_at?: string;
+}
+
 export type VideoPost = {
     id: number;
     userId: number;
@@ -79,5 +211,29 @@ export type VideoPost = {
     reviews: Comment[];
     time: string;
     location?: LocationData;
+    merchant?: {
+        id: number;
+        business_name: string;
+        business_type?: BusinessType;
+    };
+    shop?: {
+        id: number;
+        name: string;
+        address?: string;
+        phone?: string;
+        latitude: number;
+        longitude: number;
+    };
+    product?: Product;
+    shop_listing?: {
+        id: number;
+        price: number;
+        currency: string;
+        availability: StockAvailability;
+        stock_updated_at: string;
+        status?: ShopStatus;
+        shop_id?: number;
+        product_id?: number;
+    };
 };
 
