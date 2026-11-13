@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, CheckCircle } from "lucide-react";
+import { X, CheckCircle, Store, MapPin, Navigation, ChevronDown, ChevronUp, ShoppingBag, PhoneCall, Loader2 } from "lucide-react";
 import ReviewThread from "./ReviewThread";
 import CustomVideoPlayer from "./CustomVideoPlayer";
-import type { VideoPost } from "../../types";
+import MerchantShopService from "../services/merchant_shop_service";
+import type { VideoPost, NearbyShopResult } from "../../types";
 
 /* ─────────────────────────────────────────────────────────────
    VideoModal — centred, proportional overlay (not full-page)
@@ -16,6 +17,31 @@ interface VideoModalProps {
 
 const VideoModal = ({ post, token, onClose }: VideoModalProps) => {
     const [visible, setVisible] = useState(false);
+    const [relatedShops, setRelatedShops] = useState<NearbyShopResult[]>([]);
+    const [showRelatedShops, setShowRelatedShops] = useState(false);
+    const [loadingRelatedShops, setLoadingRelatedShops] = useState(false);
+
+    /* Fetch related shops if video has a product */
+    useEffect(() => {
+        let isMounted = true;
+        const fetchRelated = async () => {
+            try {
+                if (post.id) {
+                    setLoadingRelatedShops(true);
+                    const res = await MerchantShopService.getRelatedShopsForVideo(post.id);
+                    if (isMounted && res?.success && Array.isArray(res.data)) {
+                        setRelatedShops(res.data);
+                    }
+                }
+            } catch (err) {
+                console.warn("Could not fetch related shops for video:", err);
+            } finally {
+                if (isMounted) setLoadingRelatedShops(false);
+            }
+        };
+        fetchRelated();
+        return () => { isMounted = false; };
+    }, [post.id]);
 
     /* Animate in */
     useEffect(() => {
@@ -125,6 +151,149 @@ const VideoModal = ({ post, token, onClose }: VideoModalProps) => {
                         {/* Title & description */}
                         <h2 className="text-sm font-extrabold text-white leading-snug mb-1">{post.title}</h2>
                         <p className="text-gray-400 text-xs leading-relaxed">{post.description}</p>
+
+                        {/* ── Merchant, Shop & Product Rich Bottom Sheet (Flow 4) ── */}
+                        {(post.shop || post.product || post.shop_listing || post.merchant) && (
+                            <div className="mt-4 p-4 rounded-xl bg-[#1c1f2b] border border-violet-300/20 shadow-lg">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-700/60">
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-bold text-yellow-400 uppercase tracking-wider flex items-center gap-1">
+                                                <ShoppingBag size={12} />
+                                                {post.product?.name || post.title}
+                                            </span>
+                                            {post.shop_listing?.availability && (
+                                                <span
+                                                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                                        post.shop_listing.availability === 'AVAILABLE'
+                                                            ? 'bg-green-500/15 text-green-400 border border-green-500/30'
+                                                            : post.shop_listing.availability === 'OUT_OF_STOCK'
+                                                            ? 'bg-red-500/15 text-red-400 border border-red-500/30'
+                                                            : 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30'
+                                                    }`}
+                                                >
+                                                    {post.shop_listing.availability === 'AVAILABLE'
+                                                        ? 'In Stock'
+                                                        : post.shop_listing.availability === 'OUT_OF_STOCK'
+                                                        ? 'Out of Stock'
+                                                        : 'Check Availability'}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {post.product?.brand && (
+                                            <p className="text-[11px] text-slate-400 mt-0.5">
+                                                Brand: <span className="text-white font-medium">{post.product.brand}</span>
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {post.shop_listing?.price !== undefined && (
+                                        <div className="text-right">
+                                            <span className="text-xs text-slate-400 block text-left sm:text-right">Shop Price</span>
+                                            <span className="text-lg font-black text-yellow-400">
+                                                {post.shop_listing.currency === 'INR' ? '₹' : (post.shop_listing.currency || '$')}
+                                                {Number(post.shop_listing.price).toLocaleString()}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Shop Details & Direction Action */}
+                                {post.shop && (
+                                    <div className="pt-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                                        <div className="flex items-start gap-2 text-slate-300">
+                                            <Store size={15} className="text-violet-300 shrink-0 mt-0.5" />
+                                            <div>
+                                                <span className="font-bold text-white block">
+                                                    {post.shop.name}
+                                                </span>
+                                                <span className="text-[11px] text-slate-400">
+                                                    {post.shop.address}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                                            {post.shop.latitude && post.shop.longitude && (
+                                                <a
+                                                    href={`https://www.google.com/maps/dir/?api=1&destination=${post.shop.latitude},${post.shop.longitude}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs transition-colors"
+                                                >
+                                                    <Navigation size={12} /> Get Directions
+                                                </a>
+                                            )}
+                                            {post.shop.phone && (
+                                                <a
+                                                    href={`tel:${post.shop.phone}`}
+                                                    className="inline-flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors"
+                                                >
+                                                    <PhoneCall size={12} /> Call
+                                                </a>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* ── Related Shops Accordion (Flow 4: Other Shops Selling This) ── */}
+                        {relatedShops.length > 0 && (
+                            <div className="mt-3 rounded-xl border border-slate-800 bg-[#161822] overflow-hidden">
+                                <button
+                                    onClick={() => setShowRelatedShops(!showRelatedShops)}
+                                    className="w-full px-4 py-2.5 flex items-center justify-between text-xs font-bold text-slate-200 hover:bg-[#1a1e2c] transition-colors cursor-pointer"
+                                >
+                                    <span className="flex items-center gap-2">
+                                        <Store size={14} className="text-yellow-400" />
+                                        Other Nearby Shops Selling This ({relatedShops.length})
+                                        {loadingRelatedShops && <Loader2 size={12} className="animate-spin text-slate-400" />}
+                                    </span>
+                                    {showRelatedShops ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                                </button>
+
+                                {showRelatedShops && (
+                                    <div className="p-3 border-t border-slate-800 space-y-2 bg-[#12141d]">
+                                        {relatedShops.map((s, idx) => (
+                                            <div
+                                                key={s.id || s.shop_id || idx}
+                                                className="p-2.5 rounded-lg bg-[#181a24] border border-slate-800/80 flex items-center justify-between gap-2 text-xs"
+                                            >
+                                                <div>
+                                                    <span className="font-bold text-white block">
+                                                        {s.name || s.shop_name}
+                                                    </span>
+                                                    <span className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
+                                                        <MapPin size={10} className="text-violet-300" />
+                                                        {s.address} {s.distance_meters ? `(${Math.round(s.distance_meters)}m away)` : ''}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center gap-2 shrink-0">
+                                                    {s.price !== undefined && (
+                                                        <span className="font-bold text-yellow-400">
+                                                            ₹{Number(s.price).toLocaleString()}
+                                                        </span>
+                                                    )}
+                                                    {s.latitude && s.longitude && (
+                                                        <a
+                                                            href={`https://www.google.com/maps/dir/?api=1&destination=${s.latitude},${s.longitude}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300"
+                                                            title="Navigate to shop"
+                                                        >
+                                                            <Navigation size={12} />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         {/* Tags */}
                         {post.tags?.length > 0 && (

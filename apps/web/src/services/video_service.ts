@@ -77,12 +77,19 @@ export const VideoService = {
         filename: string,
         filetype: string,
         objectKey: string,
-        token: string
+        token: string,
+        entityLinks?: {
+            merchant_id?: number;
+            shop_id?: number;
+            product_id?: number;
+            shop_product_id?: number;
+        }
     ): Promise<VideoUploadResponse> {
         console.log("[createVideo] called", {
             filename,
             filetype,
             objectKey,
+            entityLinks,
         });
 
         const config = {
@@ -92,13 +99,22 @@ export const VideoService = {
         }
 
         try {
+            const payload: any = {
+                filename,
+                filetype,
+                objectKey,
+            };
+
+            if (entityLinks) {
+                if (entityLinks.merchant_id) payload.merchant_id = entityLinks.merchant_id;
+                if (entityLinks.shop_id) payload.shop_id = entityLinks.shop_id;
+                if (entityLinks.product_id) payload.product_id = entityLinks.product_id;
+                if (entityLinks.shop_product_id) payload.shop_product_id = entityLinks.shop_product_id;
+            }
+
             const response = await axios.post<VideoUploadResponse>(
                 `${baseUrl}/v1/upload/commit`,
-                {
-                    filename,
-                    filetype,
-                    objectKey,
-                },
+                payload,
                 config
             );
 

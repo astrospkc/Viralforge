@@ -36,6 +36,7 @@ export const POPULAR_LOCATIONS: LocationData[] = [
     { city: 'Tokyo', country: 'Japan', latitude: 35.6762, longitude: 139.6503 },
     { city: 'Berlin', country: 'Germany', latitude: 52.5200, longitude: 13.4050 },
     { city: 'Bangalore', country: 'India', latitude: 12.9716, longitude: 77.5946 },
+    { city: 'Dibrugarh', state: 'Assam', country: 'India', latitude: 27.4728, longitude: 94.9120 },
     { city: 'Paris', country: 'France', latitude: 48.8566, longitude: 2.3522 },
 ];
 
@@ -59,7 +60,11 @@ const SEED_LOCATION_VIDEOS: VideoPost[] = [
         tags: ['SaaS', 'React', 'SiliconValley'],
         reviews: [],
         time: '3h ago',
-        location: { city: 'San Francisco', state: 'CA', country: 'USA', latitude: 37.7749, longitude: -122.4194 }
+        location: { city: 'San Francisco', state: 'CA', country: 'USA', latitude: 37.7749, longitude: -122.4194 },
+        merchant: { id: 1, business_name: 'Rivera Labs' },
+        shop: { id: 1, name: 'Rivera Silicon Valley Hub', address: 'Market St, San Francisco', phone: '+1 415-555-0199', latitude: 37.7749, longitude: -122.4194 },
+        product: { id: 101, name: 'SaaS Architecture Starter Kit', brand: 'RiveraDev' },
+        shop_listing: { id: 11, price: 99, currency: 'USD', availability: 'AVAILABLE', stock_updated_at: '2026-11-12T10:00:00Z', status: 'ACTIVE', shop_id: 1, product_id: 101 }
     },
     {
         id: 102,
@@ -79,7 +84,11 @@ const SEED_LOCATION_VIDEOS: VideoPost[] = [
         tags: ['Shopify', 'NYC', 'Fashion'],
         reviews: [],
         time: '5h ago',
-        location: { city: 'New York', state: 'NY', country: 'USA', latitude: 40.7128, longitude: -74.0060 }
+        location: { city: 'New York', state: 'NY', country: 'USA', latitude: 40.7128, longitude: -74.0060 },
+        merchant: { id: 2, business_name: 'Manhattan Store Design' },
+        shop: { id: 2, name: 'SoHo Flagship Studio', address: 'Broadway, New York', phone: '+1 212-555-0144', latitude: 40.7128, longitude: -74.0060 },
+        product: { id: 102, name: 'Luxury Store Theme v3', brand: 'FashionUX' },
+        shop_listing: { id: 22, price: 249, currency: 'USD', availability: 'AVAILABLE', stock_updated_at: '2026-11-12T12:30:00Z', status: 'ACTIVE', shop_id: 2, product_id: 102 }
     },
     {
         id: 103,
@@ -99,67 +108,35 @@ const SEED_LOCATION_VIDEOS: VideoPost[] = [
         tags: ['Keyboards', 'Tokyo', 'Hardware'],
         reviews: [],
         time: '7h ago',
-        location: { city: 'Tokyo', country: 'Japan', latitude: 35.6762, longitude: 139.6503 }
+        location: { city: 'Tokyo', country: 'Japan', latitude: 35.6762, longitude: 139.6503 },
+        merchant: { id: 3, business_name: 'Akiba Custom Works' },
+        shop: { id: 3, name: 'Akihabara Mech Lab', address: 'Sotokanda, Chiyoda City, Tokyo', phone: '+81 3-5555-0188', latitude: 35.6762, longitude: 139.6503 },
+        product: { id: 103, name: 'CNC Aluminum 65% Flex Keyboard', brand: 'AkibaKeys' },
+        shop_listing: { id: 33, price: 18500, currency: 'JPY', availability: 'AVAILABLE', stock_updated_at: '2026-11-12T08:00:00Z', status: 'ACTIVE', shop_id: 3, product_id: 103 }
     },
     {
         id: 104,
         userId: 4,
-        userName: 'James Wu',
-        userAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
-        userVerified: false,
-        title: 'Brand Identity Design — Fintech Unicorn',
-        description: 'Complete brand guidelines and design system created for London fintech startup.',
-        category: 'design',
-        thumbnail: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?w=800&h=450&fit=crop',
-        duration: '9:02',
-        views: '29K',
-        likes: 980,
-        qualities: [{ quality: '1080p', cdnUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' }],
-        masterCdnUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-        tags: ['Design', 'London', 'Fintech'],
-        reviews: [],
-        time: '1d ago',
-        location: { city: 'London', country: 'UK', latitude: 51.5074, longitude: -0.1278 }
-    },
-    {
-        id: 105,
-        userId: 5,
-        userName: 'Nadia Osei',
-        userAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
+        userName: 'Punam Sharma',
+        userAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop',
         userVerified: true,
-        title: 'Commercial Film Production Reel — Q1 2026',
-        description: 'Cinematic camera rigs, color grading breakdown, and audio mastering from Berlin soundstage.',
-        category: 'agency',
-        thumbnail: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800&h=450&fit=crop',
-        duration: '4:58',
-        views: '62K',
-        likes: 2400,
+        title: 'Samsung Galaxy S25 Hands-on Demo & Audio Test',
+        description: 'Tested in our showroom bench. Available now with immediate local pickup.',
+        category: 'tech',
+        thumbnail: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=450&fit=crop',
+        duration: '3:45',
+        views: '24K',
+        likes: 1850,
         qualities: [{ quality: '1080p', cdnUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' }],
         masterCdnUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-        tags: ['Agency', 'Berlin', 'Cinematography'],
+        tags: ['Samsung', 'Phones', 'Dibrugarh'],
         reviews: [],
-        time: '2d ago',
-        location: { city: 'Berlin', country: 'Germany', latitude: 52.5200, longitude: 13.4050 }
-    },
-    {
-        id: 106,
-        userId: 6,
-        userName: 'Priya Nair',
-        userAvatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop',
-        userVerified: true,
-        title: 'Distributed HLS Transcoding Engine in Go',
-        description: 'Microservices benchmark running 100 concurrent 4K encodings with real-time adaptive streaming.',
-        category: 'tech',
-        thumbnail: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&h=450&fit=crop',
-        duration: '11:17',
-        views: '38K',
-        likes: 1300,
-        qualities: [{ quality: '1080p', cdnUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4' }],
-        masterCdnUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-        tags: ['Golang', 'Bangalore', 'HLS'],
-        reviews: [],
-        time: '2d ago',
-        location: { city: 'Bangalore', country: 'India', latitude: 12.9716, longitude: 77.5946 }
+        time: '2h ago',
+        location: { city: 'Dibrugarh', state: 'Assam', country: 'India', latitude: 27.4728, longitude: 94.9120 },
+        merchant: { id: 10, business_name: 'ABC Electronics' },
+        shop: { id: 10, name: 'ABC Electronics - Dibrugarh Branch', address: 'R.K.B. Path, Near Thana Chariali', phone: '+91 9876543210', latitude: 27.4728, longitude: 94.9120 },
+        product: { id: 104, name: 'Samsung Galaxy S25', brand: 'Samsung' },
+        shop_listing: { id: 55, price: 75000, currency: 'INR', availability: 'AVAILABLE', stock_updated_at: '2026-11-12T14:00:00Z', status: 'ACTIVE', shop_id: 10, product_id: 104 }
     }
 ];
 

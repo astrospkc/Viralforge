@@ -60,6 +60,9 @@ const Navbar = () => {
                     <Link to="/browse" className={`text-sm font-semibold transition ${location.pathname === '/browse' ? 'text-yellow-400' : 'text-slate-300 hover:text-white'}`}>
                         Discover Feed
                     </Link>
+                    <Link to="/editor" className={`text-sm font-semibold transition ${location.pathname === '/editor' ? 'text-yellow-400' : 'text-slate-300 hover:text-white'}`}>
+                        Studio Editor
+                    </Link>
 
                     {!isAuthenticated ? (
                         <div className="flex items-center gap-3">
